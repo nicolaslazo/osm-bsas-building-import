@@ -1,66 +1,106 @@
 # OpenStreetMap Buenos Aires City Dataset Import
 
-This project provides tools and scripts to import, clean, and process the Buenos Aires city building dataset provided by the government for spatial analysis and OSM changefile generation.
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat-square&logo=postgresql&logoColor=white)
+![PostGIS](https://img.shields.io/badge/PostGIS-4169E1?style=flat-square&logo=postgresql&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![OSM](https://img.shields.io/badge/OpenStreetMap-7EBC6F?style=flat-square&logo=openstreetmap&logoColor=white)
 
-## Project Structure
-
-- `bin/`
-  - `download-live-osm-data.sh`: Downloads live OSM building data for Buenos Aires using Overpass API.
-  - `import-datasets.sh`: Imports both the city dataset and live OSM buildings into PostgreSQL/PostGIS.
-  - `run-migrations.sql`: Runs all SQL migration scripts in order to clean and transform the imported data.
-  - `export-geojson.sh`: Debugging tool to write the output of a PostGIS query as a GeoJSON file.
-- `migrations/`: The SQL and Python scripts meant to transform both datasets into the resulting changefiles.
-- `changesets/`: The project's output directory.
+A toolset for importing, cleaning, and processing Buenos Aires building data from
+official government sources into OpenStreetMap-compatible format.
 
 ## Context & Purpose
 
-- The city dataset provides authoritative building geometries and attributes for Buenos Aires.
-- Live OSM data is used to identify and exclude buildings already mapped in OSM.
-- The migration scripts clean, deduplicate, and spatially process the city dataset for compatibility with OSM.
-- The final Python script generates OSM changefiles for import, chunked by city block (or as named in the dataset, manzana).
+This project bridges official Buenos Aires building data with OpenStreetMap by:
 
-## Instructions
+- Using authoritative city dataset geometries and attributes
+- Cross-referencing with live OSM data to prevent duplicates
+- Cleaning and transforming data through SQL migrations
+- Generating OSM changefiles chunked by city blocks ("manzanas")
 
-1. **Download the City Dataset**
-   - Visit [Buenos Aires Urban Fabric Dataset](https://data.buenosaires.gob.ar/dataset/tejido-urbano) and download the GeoJSON file. Place it as `data/dataset.geojson`.
+## Project Structure
 
-2. **Download Live OSM Data**
-   - Run:
-     ```sh
-     bin/download-live-osm-data.sh
-     ```
-   - Output will be saved as `data/live-osm-data.geojson`.
+- `bin/` - Helper scripts:
+  - `download-live-osm-data.sh` - Fetches current OSM buildings via Overpass API
+  - `import-datasets.sh` - Imports city and OSM data into PostgreSQL/PostGIS
+  - `run-migrations.sql` - Executes SQL migration scripts for data transformation
+  - `export-geojson.sh` - Exports query results as GeoJSON for debugging
+- `migrations/` - SQL and Python scripts for data transformation
+- `changesets/` - Output directory for generated OSM changefiles
 
-3. **Import Datasets into PostgreSQL/PostGIS**
-   - Ensure PostgreSQL is running and PostGIS is enabled.
-     ```sh
-     docker compose up -d
-     ```
-   - Run:
-     ```sh
-     bin/import-datasets.sh
-     ```
-   - This will import both datasets into tables `city_data` and `live_buildings`.
+## Getting Started
 
-4. **Run Data Cleaning and Transformation Migrations**
-   - Run:
-     ```sh
-     bin/run-migrations.sql
-     ```
+### 1. Download Datasets
 
-5. **Generate OSM Changefiles**
-   - Run:
-     ```sh
-     uv run migrations/500-create-changefiles.py
-     ```
-   - Changefiles will be generated in the `changesets/` directory.
+Run the import script which will download both the city dataset and OSM data:
+
+```sh
+bin/import-dataset.sh
+```
+
+This script will:
+
+- Download the city dataset from Buenos Aires Urban Fabric Dataset
+- Fetch current OSM building data via the Overpass API
+- Save files to `data/dataset.geojson` and `data/live-osm-data.geojson`
+
+### 2. Import Datasets into PostgreSQL/PostGIS
+
+Start the database:
+
+```sh
+docker compose up -d
+```
+
+Import the datasets:
+
+```sh
+bin/import-datasets.sh
+```
+
+### 3. Run Data Cleaning and Transformation
+
+```sh
+bin/run-migrations.sql
+```
+
+### 4. Generate OSM Changefiles
+
+```sh
+uv run migrations/500-create-changefiles.py
+```
+
+Changefiles will be available in the `changesets/` directory, organized by city block.
 
 ## Requirements
-- Docker Compose
+
+- Docker Compose for PostgreSQL/PostGIS
 - Python 3.12+
-- uv
-- `ogr2ogr` (GDAL)
+- uv package manager
+- GDAL with ogr2ogr
 
----
+## Visualization
 
-For questions or issues, please open an issue in this repository.
+To visualize the processing results:
+
+```sh
+bin/export-geojson.sh "SELECT * FROM processed_buildings LIMIT 100" > debug.geojson
+```
+
+Then open the file in QGIS or any GeoJSON viewer.
+
+## References
+
+- [Buenos Aires Urban Fabric Dataset](https://data.buenosaires.gob.ar/dataset/tejido-urbano)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
+
+## Contributing
+
+Contributions are welcome! Feel free to:
+
+- Report issues
+- Suggest improvements to the processing pipeline
+- Add new data cleaning rules
+- Enhance documentation
