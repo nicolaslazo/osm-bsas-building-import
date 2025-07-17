@@ -1,0 +1,23 @@
+services:
+  postgis:
+    image: postgis/postgis:16-3.5-alpine
+    container_name: osm_postgis
+    environment:
+      POSTGRES_USER: osm
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: osm_db
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - osm_pgdata:/var/lib/postgresql/data
+    ports:
+      - "6543:5432"
+    command: postgres -c shared_buffers=4GB -c work_mem=256MB -c maintenance_work_mem=512MB -c temp_buffers=512MB -c max_parallel_workers_per_gather=12 -c max_worker_processes=12 -c max_parallel_workers=12
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 7G
+    shm_size: 2g
+
+volumes:
+  osm_pgdata:

@@ -1,0 +1,4 @@
+changesets/
+data/
+
+*.geojson
