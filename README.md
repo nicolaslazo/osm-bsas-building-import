@@ -4,6 +4,7 @@
 ![PostGIS](https://img.shields.io/badge/PostGIS-4169E1?style=flat-square&logo=postgresql&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
 ![OSM](https://img.shields.io/badge/OpenStreetMap-7EBC6F?style=flat-square&logo=openstreetmap&logoColor=white)
+![Leer en Español](https://img.shields.io/badge/%F0%9F%87%A6%F0%9F%87%B7-Leer_en_Espa%C3%B1ol-6CACE4?style=flat-square&link=README.es.md)
 
 A toolset for importing, cleaning, and processing Buenos Aires building data from
 official government sources into OpenStreetMap-compatible format.
@@ -94,7 +95,8 @@ Then open the file in QGIS or any GeoJSON viewer.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
+This project is licensed under the MIT License -
+see the [LICENSE](LICENSE.md) file for details.
 
 ## Contributing
 
