@@ -21,7 +21,7 @@ This project bridges official Buenos Aires building data with OpenStreetMap by:
 ## Project Structure
 
 - `bin/` - Helper scripts:
-  - `download-live-osm-data.sh` - Fetches current OSM buildings via Overpass API
+  - `download-dataset.sh` - Fetches the Buenos Aires urban fabric dataset
   - `import-datasets.sh` - Imports city and OSM data into PostgreSQL/PostGIS
   - `run-migrations.sql` - Executes SQL migration scripts for data transformation
   - `export-geojson.sh` - Exports query results as GeoJSON for debugging
