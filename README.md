@@ -32,17 +32,29 @@ This project bridges official Buenos Aires building data with OpenStreetMap by:
 
 ### 1. Download Datasets
 
-Run the import script which will download both the city dataset and OSM data:
+1. Go to [Overpass Turbo](https://overpass-turbo.eu/)
+2. Paste the following query:
+
+   ```
+   [out:json][timeout:900];
+   area["name"="Buenos Aires"]["boundary"="administrative"]["admin_level"="8"]->.searchArea;
+   (
+     way["building"](area.searchArea);
+     relation["building"](area.searchArea);
+   );
+   out body;
+   >;
+   out skel qt;
+   ```
+
+3. Run the query, then use Export > GeoJSON to save as `data/live-osm-data.geojson`
+4. Run the dataset download script:
 
 ```sh
-bin/import-dataset.sh
+bin/download-dataset.sh
 ```
 
-This script will:
-
-- Download the city dataset from Buenos Aires Urban Fabric Dataset
-- Fetch current OSM building data via the Overpass API
-- Save files to `data/dataset.geojson` and `data/live-osm-data.geojson`
+This script will save the contents to `data/tejido.geojson`.
 
 ### 2. Import Datasets into PostgreSQL/PostGIS
 

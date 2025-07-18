@@ -4,7 +4,7 @@
 ![PostGIS](https://img.shields.io/badge/PostGIS-4169E1?style=flat-square&logo=postgresql&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
 ![OSM](https://img.shields.io/badge/OpenStreetMap-7EBC6F?style=flat-square&logo=openstreetmap&logoColor=white)
-![English](https://img.shields.io/badge/English-Original-blue?style=flat-square&link=README.md)
+[![English](https://img.shields.io/badge/English-Original-blue?style=flat-square&logo=english&logoColor=white)](README.md)
 
 Un conjunto de herramientas para importar, limpiar y
 procesar datos de edificios de Buenos Aires desde
@@ -34,22 +34,33 @@ con OpenStreetMap mediante:
 
 ## Primeros Pasos
 
-### 1. Descargar Conjuntos de Datos
+### 1. Descargar Dataset
 
-Ejecutá el script de importación que va a descargar
-tanto el dataset de la ciudad como los datos de OSM:
+1. Visitá [Overpass Turbo](https://overpass-turbo.eu/)
+2. Pegá la siguiente consulta:
+
+   ```
+   [out:json][timeout:900];
+   area["name"="Buenos Aires"]["boundary"="administrative"]["admin_level"="8"]->.searchArea;
+   (
+     way["building"](area.searchArea);
+     relation["building"](area.searchArea);
+   );
+   out body;
+   >;
+   out skel qt;
+   ```
+
+3. Ejecutá la consulta, después usá Exportar > GeoJSON para guardar como `data/live-osm-data.geojson`
+4. Corré el script de descarga del dataset::
 
 ```sh
-bin/import-dataset.sh
+bin/download-dataset.sh
 ```
 
-Este script:
+Los contenidos se van a descargar en `data/tejido.geojson`.
 
-- Descarga el dataset de la ciudad
-- Obtiene datos actuales de edificios de OSM a través de la API de Overpass
-- Guarda los archivos en `data/dataset.geojson` y `data/live-osm-data.geojson`
-
-### 2. Importar Conjuntos de Datos a PostgreSQL/PostGIS
+### 2. Importar Datasets a PostgreSQL/PostGIS
 
 Iniciá la base de datos:
 

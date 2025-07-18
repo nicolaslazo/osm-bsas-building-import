@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROJECT_ROOT="$(dirname "$(realpath "$0")")"
+PROJECT_ROOT="$(dirname "$(dirname "$(realpath "$0")")")"
 DATA_DIR="${PROJECT_ROOT}/data"
 
 ogr2ogr \
@@ -11,7 +11,7 @@ ogr2ogr \
   -lco GEOMETRY_NAME=geom \
   -lco FID=ogr_fid \
   -lco SPATIAL_INDEX=GIST \
-  "GeoJSONSeq:${DATA_DIR}/tejido.geojson"
+  "${DATA_DIR}/tejido.geojson"
 
 ogr2ogr \
   -f "PostgreSQL" \
@@ -21,4 +21,4 @@ ogr2ogr \
   -lco GEOMETRY_NAME=geom \
   -lco FID=ogr_fid \
   -lco SPATIAL_INDEX=GIST \
-  "GeoJSONSeq:${DATA_DIR}/live-buildings.geojson"
+  "${DATA_DIR}/live-osm-data.geojson"
