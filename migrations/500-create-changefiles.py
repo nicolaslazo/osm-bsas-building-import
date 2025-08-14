@@ -2,16 +2,20 @@
 # /// script
 # requires-python = ">=3.12"
 # dependencies = [
-#     "psycopg2-binary",
+#     "itertools",
+#     "psycopg[binary]",
 #     "shapely",
 # ]
 # ///
 
-import os
-import psycopg2
-from psycopg2.extras import RealDictCursor
-from shapely.geometry import MultiPolygon, shape
-import json
+import itertools
+import psycopg
+import shapely
+
+from collections import defaultdict
+from dataclasses import dataclass
+from shapely import MultiPolygon, Polygon, wkb
+from typing import Generator, Iterator
 
 # Database connection parameters
 DB_PARAMS = {
@@ -19,265 +23,227 @@ DB_PARAMS = {
     "port": 6543,
     "database": "osm_db",
     "user": "osm",
-    "password": "password"
+    "password": "password",
 }
-
-OUTPUT_DIR = "changesets"
-MANZANAS_PER_FILE = 5
+BUILDINGS_TABLE = "non_intersecting"
 
 
-def create_changesets(manzana_groups):
-    # Get list of manzanas and chunk them
-    manzanas = list(manzana_groups.keys())
-    chunk_size = MANZANAS_PER_FILE
-    chunks = [manzanas[i:i + chunk_size] for i in range(0, len(manzanas), chunk_size)]
+class IdGenerator:
+    def __init__(self):
+        self._node_counter = 0
+        self._way_counter = 0
+        self._relation_counter = 0
 
-    # Create a changeset file for each chunk
-    for i, chunk in list(enumerate(chunks))[:3]:
-        changeset_file = os.path.join(OUTPUT_DIR, f"changeset_{i+1}.osc")
+    def next_node(self):
+        self._node_counter -= 1
+        return self._node_counter
 
-        # Start XML file with osmChange format
-        with open(changeset_file, 'w') as f:
-            f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
-            f.write('<osmChange version="0.6" generator="building-import-script">\n')
-            f.write('  <create>\n')  # All operations are creations
+    def next_way(self):
+        self._way_counter -= 1
+        return self._way_counter
 
-            # Track node IDs (will be negative for new objects)
-            node_id = -1
-            way_id = -1
-            relation_id = -1
-
-            # Process each manzana in this chunk
-            for manzana_key in chunk:
-                buildings = manzana_groups[manzana_key]
-
-                for building in buildings:
-                    smp = building['smp']
-                    parts = building['parts']  # Building parts sharing this SMP
-                    is_multipart = building['is_multipart']  # Derived from multiple rows
-
-                    if is_multipart:
-                        # Create a multipolygon relation for buildings with multiple geometries
-                        relation_id -= 1
-                        relation_members = []
-
-                        for part in parts:
-                            # Create a way for each geometry part
-                            geom = part['geom']
-
-                            # Handle both Polygon and MultiPolygon geometries
-                            if isinstance(geom, MultiPolygon):
-                                # Process each polygon in the multipolygon
-                                for poly in geom.geoms:
-                                    way_id -= 1
-                                    way_nodes = []
-
-                                    # Get coordinates for the exterior ring
-                                    coords = list(poly.exterior.coords)
-
-                                    # Create nodes for each coordinate
-                                    for x, y in coords[:-1]:  # Exclude last point which is same as first
-                                        node_id -= 1
-                                        # Convert to lat/lon - OSM uses lat first, lon second
-                                        f.write(f'    <node id="{node_id}" lat="{y}" lon="{x}" version="1"/>\n')
-                                        way_nodes.append(node_id)
-
-                                    # Create the way
-                                    f.write(f'    <way id="{way_id}" version="1">\n')
-                                    for node in way_nodes:
-                                        f.write(f'      <nd ref="{node}"/>\n')
-
-                                    # Close the polygon by referencing the first node again
-                                    f.write(f'      <nd ref="{way_nodes[0]}"/>\n')
-
-                                    # Add tags to way (only building=part)
-                                    f.write('      <tag k="building:part" v="yes"/>\n')
-                                    f.write('    </way>\n')
-
-                                    relation_members.append(way_id)
-                            else:
-                                # Process a simple polygon
-                                way_id -= 1
-                                way_nodes = []
-
-                                # Get coordinates for the exterior ring
-                                coords = list(geom.exterior.coords)
-
-                                # Create nodes for each coordinate
-                                for x, y in coords[:-1]:  # Exclude last point which is same as first
-                                    node_id -= 1
-                                    # Convert to lat/lon - OSM uses lat first, lon second
-                                    f.write(f'    <node id="{node_id}" lat="{y}" lon="{x}" version="1"/>\n')
-                                    way_nodes.append(node_id)
-
-                                # Create the way
-                                f.write(f'    <way id="{way_id}" version="1">\n')
-                                for node in way_nodes:
-                                    f.write(f'      <nd ref="{node}"/>\n')
-
-                                # Close the polygon by referencing the first node again
-                                f.write(f'      <nd ref="{way_nodes[0]}"/>\n')
-
-                                # Add tags to way (only building=part)
-                                f.write('      <tag k="building:part" v="yes"/>\n')
-                                f.write('    </way>\n')
-
-                                relation_members.append(way_id)
-
-                        # Create the multipolygon relation for the entire building
-                        f.write(f'    <relation id="{relation_id}" version="1">\n')
-                        for member_id in relation_members:
-                            f.write(f'      <member type="way" ref="{member_id}" role="outer"/>\n')
-                        f.write('      <tag k="type" v="building"/>\n')
-                        f.write('      <tag k="building" v="yes"/>\n')
-                        f.write(f'      <tag k="smp" v="{smp}"/>\n')
-                        # Use height from first part if available
-                        if parts[0]['altura'] is not None:
-                            f.write(f'      <tag k="height" v="{parts[0]["altura"]}"/>\n')
-                        f.write('    </relation>\n')
-                    else:
-                        # Create a simple way for single-geometry buildings
-                        part = parts[0]  # Just one part for single buildings
-                        geom = part['geom']
-
-                        # Handle both Polygon and MultiPolygon geometries
-                        if isinstance(geom, MultiPolygon):
-                            # For multipolygon geometries, create a relation
-                            relation_id -= 1
-                            relation_members = []
-
-                            for poly in geom.geoms:
-                                way_id -= 1
-                                way_nodes = []
-
-                                # Get coordinates for the exterior ring
-                                coords = list(poly.exterior.coords)
-
-                                # Create nodes for each coordinate
-                                for x, y in coords[:-1]:  # Exclude last point which is same as first
-                                    node_id -= 1
-                                    # Convert to lat/lon - OSM uses lat first, lon second
-                                    f.write(f'    <node id="{node_id}" lat="{y}" lon="{x}" version="1"/>\n')
-                                    way_nodes.append(node_id)
-
-                                # Create the way
-                                f.write(f'    <way id="{way_id}" version="1">\n')
-                                for node in way_nodes:
-                                    f.write(f'      <nd ref="{node}"/>\n')
-
-                                # Close the polygon by referencing the first node again
-                                f.write(f'      <nd ref="{way_nodes[0]}"/>\n')
-
-                                # Add tags to way (only building=part)
-                                f.write('      <tag k="building:part" v="yes"/>\n')
-                                f.write('    </way>\n')
-
-                                relation_members.append(way_id)
-
-                            # Create the multipolygon relation
-                            f.write(f'    <relation id="{relation_id}" version="1">\n')
-                            for member_id in relation_members:
-                                f.write(f'      <member type="way" ref="{member_id}" role="outer"/>\n')
-                            f.write('      <tag k="type" v="multipolygon"/>\n')
-                            f.write('      <tag k="building" v="yes"/>\n')
-                            f.write(f'      <tag k="smp" v="{smp}"/>\n')
-                            if parts[0]['altura'] is not None:
-                                f.write(f'      <tag k="height" v="{parts[0]["altura"]}"/>\n')
-                            f.write('    </relation>\n')
-                        else:
-                            # Simple polygon, create a way
-                            way_id -= 1
-                            way_nodes = []
-
-                            # Get coordinates for the exterior ring
-                            coords = list(geom.exterior.coords)
-
-                            # Create nodes for each coordinate
-                            for x, y in coords[:-1]:  # Exclude last point which is same as first
-                                node_id -= 1
-                                # Convert to lat/lon - OSM uses lat first, lon second
-                                f.write(f'    <node id="{node_id}" lat="{y}" lon="{x}" version="1"/>\n')
-                                way_nodes.append(node_id)
-
-                            # Create the way
-                            f.write(f'    <way id="{way_id}" version="1">\n')
-                            for node in way_nodes:
-                                f.write(f'      <nd ref="{node}"/>\n')
-
-                            # Close the polygon by referencing the first node again
-                            f.write(f'      <nd ref="{way_nodes[0]}"/>\n')
-
-                            # Add tags
-                            f.write('      <tag k="building" v="yes"/>\n')
-                            f.write(f'      <tag k="smp" v="{smp}"/>\n')
-                            if part['altura'] is not None:
-                                f.write(f'      <tag k="height" v="{part["altura"]}"/>\n')
-                            f.write('    </way>\n')
-
-            # Close XML file
-            f.write('  </create>\n')
-            f.write('</osmChange>\n')
+    def next_rel(self):
+        self._relation_counter -= 1
+        return self._relation_counter
 
 
-def main():
-    # create output directory if it doesn't exist
-    os.makedirs("changesets", exist_ok=True)
+@dataclass
+class Feature:
+    section: str
+    block: str
+    smp: str
+    height: float
+    geom: shapely.Geometry
 
-    # connect to database
-    conn = psycopg2.connect(**DB_PARAMS)
 
-    # get all non_intersecting geometries
-    query = """
-    select id, smp, seccion, manzana, parcela, altura, st_asgeojson(geom) as geom
-    from non_intersecting
-    where seccion = '13'
-    order by seccion desc, manzana desc, parcela desc
+def query_features(conn) -> Generator[Feature, None, None]:
+    """
+    Fetch building records from the PostGIS database.
     """
 
-    with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-        cursor.execute(query)
-        rows = cursor.fetchall()
+    query = f"""
+        SELECT seccion, manzana, smp, altura, ST_AsBinary(geom) AS geom
+        FROM {BUILDINGS_TABLE}
+        ORDER BY seccion, manzana;
+    """
+    cur = conn.execute(query)
 
-        # group geometries by smp
-        # multiple rows with the same smp indicate a multipart building
-        smp_groups = {}
-        for row in rows:
-            smp = row['smp']
-            if smp not in smp_groups:
-                smp_groups[smp] = []
+    for seccion, manzana, smp, altura, geom_wkb in cur:
+        # Convert WKB (well known bytes) to Shapely geometry
+        geom = wkb.loads(geom_wkb, hex=False)
 
-            geom_json = json.loads(row['geom'])
-            geom = shape(geom_json)
-            smp_groups[smp].append({
-                'id': row['id'],
-                'seccion': row['seccion'],
-                'manzana': row['manzana'],
-                'parcela': row['parcela'],
-                'altura': row['altura'],
-                'geom': geom
-            })
+        yield Feature(section=seccion, block=manzana, smp=smp, height=altura, geom=geom)
 
-        # group by manzana
-        manzana_groups = {}
-        for smp, geoms in smp_groups.items():
-            key = f"{geoms[0]['seccion']}-{geoms[0]['manzana']}"
-            if key not in manzana_groups:
-                manzana_groups[key] = []
 
-            # we detect multipart buildings by checking if multiple rows share the same smp
-            is_multipart = len(geoms) > 1
-            manzana_groups[key].append({
-                'smp': smp,
-                'parts': geoms,  # list of building parts sharing this smp
-                'is_multipart': is_multipart  # derived from multiple rows with same smp
-            })
+def create_osm_elements_for_feature(feature: Feature, id_gen: IdGenerator):
+    """
+    Convert a Shapely geometry into OSM XML elements (nodes + way or relation).
+    Returns (xml_string, element_id, element_type).
+    """
+    xml_parts = []
 
-        # create changesets with ~5 manzanas per file
-        create_changesets(manzana_groups)
+    def add_node(lat, lon):
+        node_id = id_gen.next_node()
+        xml_parts.append(
+            f'    <node id="{node_id}" changeset="1" version="1" lat="{lat}" lon="{lon}" />'
+        )
+        return node_id
 
-    conn.close()
-    print("Generated changesets")
+    match feature.geom:
+        case Polygon():
+            # Single polygon => one way
+            polygon = feature.geom
+            outer_coords = list(polygon.exterior.coords)
+            if outer_coords[0] != outer_coords[-1]:
+                outer_coords.append(outer_coords[0])
+            # Create nodes for outer ring
+            node_ids = [add_node(y, x) for (x, y) in outer_coords]
+            # Create way
+            way_id = id_gen.next_way()
+            xml_parts.append(f'    <way id="{way_id}" changeset="1" version="1">')
+            for ref in node_ids:
+                xml_parts.append(f'      <nd ref="{ref}"/>')
+            # Tags for height and building part
+            xml_parts.append(f'      <tag k="height" v="{feature.height}"/>')
+            xml_parts.append(f'      <tag k="building:part" v="yes"/>')
+            xml_parts.append("    </way>")
+            return "\n".join(xml_parts), way_id, "way"
+
+        case MultiPolygon():
+            # MultiPolygon or polygon with holes => use a multipolygon relation
+            rel_id = id_gen.next_rel()
+            xml_parts.append(f'    <relation id="{rel_id}" changeset="1" version="1">')
+            xml_parts.append('      <tag k="type" v="multipolygon"/>')
+            xml_parts.append(f'      <tag k="height" v="{feature.height}"/>')
+            xml_parts.append(f'      <tag k="building:part" v="yes"/>')
+            # Iterate over each polygon component
+            for polygon in feature.geom.geoms:
+                # Outer ring as a way
+                outer_coords = list(polygon.exterior.coords)
+                if outer_coords[0] != outer_coords[-1]:
+                    outer_coords.append(outer_coords[0])
+                outer_node_ids = [add_node(y, x) for (x, y) in outer_coords]
+                outer_way_id = id_gen.next_way()
+                # Add as outer member in relation
+                xml_parts.append(
+                    f'      <member type="way" ref="{outer_way_id}" role="outer"/>'
+                )
+                # Build outer way XML
+                outer_way_xml = [
+                    f'    <way id="{outer_way_id}" changeset="1" version="1">'
+                ]
+                for ref in outer_node_ids:
+                    outer_way_xml.append(f'      <nd ref="{ref}"/>')
+                outer_way_xml.append("    </way>")
+                # Handle inner rings for this polygon
+                for interior in polygon.interiors:
+                    inner_coords = list(interior.coords)
+                    if inner_coords[0] != inner_coords[-1]:
+                        inner_coords.append(inner_coords[0])
+                    inner_node_ids = [add_node(y, x) for (x, y) in inner_coords]
+                    inner_way_id = id_gen.next_way()
+                    xml_parts.append(
+                        f'      <member type="way" ref="{inner_way_id}" role="inner"/>'
+                    )
+                    inner_way_xml = [
+                        f'    <way id="{inner_way_id}" changeset="1" version="1">'
+                    ]
+                    for ref in inner_node_ids:
+                        inner_way_xml.append(f'      <nd ref="{ref}"/>')
+                    inner_way_xml.append("    </way>")
+                    # Append the inner way XML to the main list
+                    xml_parts.extend(inner_way_xml)
+                # Append the outer way XML after inner ways
+                xml_parts.extend(outer_way_xml)
+            xml_parts.append("    </relation>")
+            return "\n".join(xml_parts), rel_id, "relation"
+
+        case _:
+            raise ValueError(f"Unsupported geometry type: {type(feature.geom)}")
+
+
+def create_building_relation(smp, part_members, id_gen):
+    """
+    Create a type=building relation XML string for the given SMP and its part members.
+    part_members is a list of (element_id, element_type) for each part.
+    """
+    rel_id = id_gen.next_rel()
+    lines = [f'    <relation id="{rel_id}" changeset="1" version="1">']
+    lines.append('      <tag k="type" v="building"/>')
+    lines.append(f'      <tag k="ref:SMP" v="{smp}"/>')
+    lines.append('      <tag k="source" v="GCBA Tejido Urbano"/>')
+    for elem_id, elem_type in part_members:
+        lines.append(f'      <member type="{elem_type}" ref="{elem_id}" role="part"/>')
+    lines.append("    </relation>")
+    return "\n".join(lines)
+
+
+def export_buildings_to_osc(features: Iterator[Feature]) -> None:
+    # Map (section, block) to list of SMPs in that block
+    section_block_map = defaultdict(list)
+    for smp, records in buildings_by_smp.items():
+        sec = records[0]["seccion"]
+        mz = records[0]["manzana"]
+        section_block_map[(sec, mz)].append(smp)
+    # Group blocks by section
+    section_to_blocks = defaultdict(list)
+    for (sec, mz), smps in section_block_map.items():
+        section_to_blocks[sec].append(mz)
+    # Create output files for each group of ~5 blocks in each section
+    for sec, blocks in section_to_blocks.items():
+        blocks.sort()
+        for i in range(0, len(blocks), 5):
+            chunk = blocks[i : i + 5]
+            if not chunk:
+                continue
+            start_block = chunk[0]
+            end_block = chunk[-1]
+            filename = f"sec{sec}_blocks_{start_block}"
+            if end_block != start_block:
+                filename += f"-{end_block}"
+            filename += ".osc"
+            # Start building the OsmChange XML content
+            lines = ['<?xml version="1.0" encoding="UTF-8"?>']
+            lines.append('<osmChange version="0.6" generator="PostGIS-to-OSC Script">')
+            lines.append("  <create>")
+            id_gen = IdGenerator()  # new ID generator for this file
+            # Populate the create section with building parts and relations
+            for mz in chunk:
+                for smp in section_block_map[(sec, mz)]:
+                    records = buildings_by_smp[smp]
+                    part_members = []
+                    # Create OSM elements for each geometry in this SMP
+                    for record in records:
+                        geom = record["geometry"]
+                        altura = record["altura"]
+                        geom_xml, elem_id, elem_type = create_osm_elements_for_geom(
+                            geom, altura, id_gen
+                        )
+                        lines.append(geom_xml)
+                        part_members.append((elem_id, elem_type))
+                    # Create the building relation for this SMP group
+                    building_rel_xml = create_building_relation(
+                        smp, part_members, id_gen
+                    )
+                    lines.append(building_rel_xml)
+            lines.append("  </create>")
+            lines.append("</osmChange>")
+            # Write to file
+            with open(filename, "w", encoding="utf-8") as f:
+                f.write("\n".join(lines))
+            print(f"Written {filename}")
 
 
 if __name__ == "__main__":
-    main()
+    with psycopg.connect(autocommit=True, **DB_PARAMS) as conn:
+        features_iter: Generator[Feature, None, None] = query_features(conn)
+        grouped_by_section: Generator[Iterator[Feature], None, None] = iter(
+            group
+            for _, group in itertools.groupby(features_iter, key=lambda f: f.section)
+        )
+        block_batches = itertools.chain.from_iterable(
+            itertools.batched(group, 5) for group in grouped_by_section
+        )
+
+        for batch in block_batches:
+            export_buildings_to_osc(batch)
