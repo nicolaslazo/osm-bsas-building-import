@@ -25,6 +25,7 @@ This project bridges official Buenos Aires building data with OpenStreetMap by:
   - `import-datasets.sh` - Imports city and OSM data into PostgreSQL/PostGIS
   - `run-migrations.sql` - Executes SQL migration scripts for data transformation
   - `export-geojson.sh` - Exports query results as GeoJSON for debugging
+- `examples/` - Example GeoJSON files for some of the addressed issues
 - `migrations/` - SQL and Python scripts for data transformation
 - `changesets/` - Output directory for generated OSM changefiles
 

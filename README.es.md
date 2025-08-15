@@ -29,6 +29,7 @@ con OpenStreetMap mediante:
   - `run-migrations.sql` - Ejecuta scripts de migración SQL
   para la transformación de datos
   - `export-geojson.sh` - Exporta resultados de consultas como GeoJSON para debugging
+- `examples/` - Archivos GeoJSON de ejemplo para algunos de los problemas abordados
 - `migrations/` - Scripts SQL y Python para transformación de datos
 - `changesets/` - Directorio de salida para los archivos de cambios de OSM generados
 
