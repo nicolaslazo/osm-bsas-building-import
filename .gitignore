@@ -2,3 +2,4 @@ changesets/
 data/
 
 *.geojson
+!examples/*.geojson
