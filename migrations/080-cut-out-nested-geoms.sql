@@ -1,5 +1,6 @@
--- Description: In the case an SMP contains nested buildings,
--- cut out the smaller buildings from the larger ones
+-- Description: In the case an SMP contains nested geometries,
+-- cut out the smaller geoms from the larger ones.
+-- Refer to examples/nested-geometries.geojson for an instance of this issue.
 
 WITH contained_union AS (
     SELECT

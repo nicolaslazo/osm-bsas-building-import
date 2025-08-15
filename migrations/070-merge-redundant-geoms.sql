@@ -1,4 +1,6 @@
--- Description: Merge any intersecting or adjacent shapes with the same SMP and height
+-- Description: Merge any intersecting or adjacent geometries with the same SMP and height,
+-- as keeping them separate doesn't provide any meaningful information to OSM.
+-- Refer to examples/redundant-geometries.geojson for an example of the issue.
 
 BEGIN;
 
