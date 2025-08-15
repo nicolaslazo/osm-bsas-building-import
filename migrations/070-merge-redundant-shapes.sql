@@ -31,8 +31,8 @@ SELECT
     g.altura,
     ARRAY(SELECT DISTINCT u FROM unnest(g.shape_ids) u ORDER BY u) AS shape_ids,
     ST_Buffer(
-        ST_Buffer(ST_Union(c.geom), 0.000002), 
-        -0.000002
+        ST_Buffer(ST_Union(c.geom), 2e-6), 
+        -2e-6
     ) AS merged_geom
 FROM grouped_shapes g
 JOIN city_data c ON c.ogr_fid = ANY(g.shape_ids)
