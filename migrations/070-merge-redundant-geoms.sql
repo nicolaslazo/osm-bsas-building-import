@@ -33,7 +33,7 @@ SELECT
     g.altura,
     ARRAY(SELECT DISTINCT u FROM unnest(g.shape_ids) u ORDER BY u) AS shape_ids,
     ST_Buffer(
-        ST_Buffer(ST_Union(c.geom), 2e-6), 
+        ST_Buffer(ST_Union(c.geom), 2e-6),  -- ~20cm tolerance
         -2e-6
     ) AS merged_geom
 FROM grouped_shapes g
