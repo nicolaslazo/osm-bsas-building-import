@@ -16,12 +16,13 @@ This project bridges official Buenos Aires building data with OpenStreetMap by:
 - Using authoritative city dataset geometries and attributes
 - Cross-referencing with live OSM data to prevent duplicates
 - Cleaning and transforming data through SQL migrations
-- Generating OSM changefiles chunked by city blocks ("manzanas")
+- Generating result sets: New files per seccion, Conflicts files per block, Reshape tasks
 
 ## Project Structure
 
 - `bin/` - Helper scripts:
   - `download-dataset.sh` - Fetches the Buenos Aires urban fabric dataset
+  - `fetch-live.sh` - Fetches Live OSM buildings with metadata from Overpass
   - `import-datasets.sh` - Imports city and OSM data into PostgreSQL/PostGIS
   - `run-migrations.sql` - Executes SQL migration scripts for data transformation
   - `export-geojson.sh` - Exports query results as GeoJSON for debugging
@@ -33,29 +34,10 @@ This project bridges official Buenos Aires building data with OpenStreetMap by:
 
 ### 1. Download Datasets
 
-1. Go to [Overpass Turbo](https://overpass-turbo.eu/)
-2. Paste the following query:
-
-   ```
-   [out:json][timeout:900];
-   area["name"="Buenos Aires"]["boundary"="administrative"]["admin_level"="8"]->.searchArea;
-   (
-     way["building"](area.searchArea);
-     relation["building"](area.searchArea);
-   );
-   out body;
-   >;
-   out skel qt;
-   ```
-
-3. Run the query, then use Export > GeoJSON to save as `data/live-osm-data.geojson`
-4. Run the dataset download script:
-
 ```sh
-bin/download-dataset.sh
+bin/download-dataset.sh   # city dataset, data/tejido-<date>.geojson and its .source (changeset source tag)
+bin/fetch-live.sh         # Live OSM fetch from Overpass, data/live-osm-<date>.osm
 ```
-
-This script will save the contents to `data/tejido.geojson`.
 
 ### 2. Import Datasets into PostgreSQL/PostGIS
 
@@ -65,31 +47,47 @@ Start the database:
 docker compose up -d
 ```
 
-Import the datasets:
+Import the datasets into a schema, one per run:
 
 ```sh
-bin/import-datasets.sh
+# IMPORT_UID: the import account's OSM uid, once it has uploaded New
+TEJIDO=data/tejido-<date>.geojson LIVE=data/live-osm-<date>.osm bin/import-datasets.sh run_<date>
 ```
 
-### 3. Run Data Cleaning and Transformation
+### 3. Run Data Cleaning, Structures and Classification
 
 ```sh
-bin/run-migrations.sql
+bin/run-migrations.sql run_<date>
 ```
 
-### 4. Generate OSM Changefiles
+Each migration runs in its own transaction and the runner stops at the first error. Two gates
+(102 and 160) stop the run when the footprint counts or the classification do not reconcile.
+
+### 4. Generate the Result Sets
 
 ```sh
-uv run migrations/500-create-changefiles.py
+.venv/bin/python migrations/500-create-changefiles.py run_<date> --live data/live-osm-<date>.osm
 ```
 
-Changefiles will be available in the `changesets/` directory, organized by city block.
+The venv setup is in the script header; it needs the system GDAL Python bindings. The result
+sets go to `changesets/run_<date>/`:
+
+- `new/`: New structures, one `.osm` file per seccion
+- `conflicts/`: Conflicts, one `.osm` file per block, for review
+- `reshape/`: one `.osc` file per Reshape task (neighbouring Reshape groups of one block), for a
+  MapRoulette cooperative challenge
+
+Before the next release round, check the old nodes Reshape left unused (uploads nothing):
+
+```sh
+python3 migrations/510-clean-up-reshape-orphans.py changesets/run_<date>
+```
 
 ## Requirements
 
 - Docker Compose for PostgreSQL/PostGIS
 - Python 3.12+
-- uv package manager
+- uv package manager (to set up `.venv`)
 - GDAL with ogr2ogr
 
 ## Visualization
@@ -97,7 +95,7 @@ Changefiles will be available in the `changesets/` directory, organized by city 
 To visualize the processing results:
 
 ```sh
-bin/export-geojson.sh "SELECT * FROM processed_buildings LIMIT 100" > debug.geojson
+bin/export-geojson.sh "SELECT * FROM run_<date>.structures LIMIT 100" > debug.geojson
 ```
 
 Then open the file in QGIS or any GeoJSON viewer.

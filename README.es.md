@@ -18,13 +18,13 @@ con OpenStreetMap mediante:
 - El uso de geometrías y atributos de datasets autorizados de la ciudad
 - La referencia cruzada con datos en vivo de OSM para evitar conflictos
 - La limpieza y transformación de datos a través de migraciones SQL
-- La generación de archivos de cambios de OSM agrupados por manzanas
+- La generación de conjuntos de resultados: archivos New por sección, Conflicts por manzana y tareas Reshape
 
 ## Estructura del Proyecto
 
 - `bin/` - Scripts auxiliares:
   - `download-dataset.sh` - Descarga el dataset de tejido urbano de Buenos Aires
-  a través de la API de Overpass
+  - `fetch-live.sh` - Descarga los edificios de OSM en vivo, con metadatos, desde Overpass
   - `import-datasets.sh` - Importa datos de la ciudad y OSM en PostgreSQL/PostGIS
   - `run-migrations.sql` - Ejecuta scripts de migración SQL
   para la transformación de datos
@@ -35,31 +35,12 @@ con OpenStreetMap mediante:
 
 ## Primeros Pasos
 
-### 1. Descargar Dataset
-
-1. Visitá [Overpass Turbo](https://overpass-turbo.eu/)
-2. Pegá la siguiente consulta:
-
-   ```
-   [out:json][timeout:900];
-   area["name"="Buenos Aires"]["boundary"="administrative"]["admin_level"="8"]->.searchArea;
-   (
-     way["building"](area.searchArea);
-     relation["building"](area.searchArea);
-   );
-   out body;
-   >;
-   out skel qt;
-   ```
-
-3. Ejecutá la consulta, después usá Exportar > GeoJSON para guardar como `data/live-osm-data.geojson`
-4. Corré el script de descarga del dataset::
+### 1. Descargar Datasets
 
 ```sh
-bin/download-dataset.sh
+bin/download-dataset.sh   # dataset de la ciudad, data/tejido-<fecha>.geojson y su .source (etiqueta source de los changesets)
+bin/fetch-live.sh         # descarga de OSM en vivo desde Overpass, data/live-osm-<fecha>.osm
 ```
-
-Los contenidos se van a descargar en `data/tejido.geojson`.
 
 ### 2. Importar Datasets a PostgreSQL/PostGIS
 
@@ -69,32 +50,48 @@ Iniciá la base de datos:
 docker compose up -d
 ```
 
-Importá los datasets:
+Importá los datasets en un schema, uno por corrida:
 
 ```sh
-bin/import-datasets.sh
+# IMPORT_UID: el uid de OSM de la cuenta de importación, una vez que subió New
+TEJIDO=data/tejido-<fecha>.geojson LIVE=data/live-osm-<fecha>.osm bin/import-datasets.sh run_<fecha>
 ```
 
-### 3. Ejecutar Limpieza y Transformación de Datos
+### 3. Ejecutar Limpieza, Estructuras y Clasificación
 
 ```sh
-bin/run-migrations.sql
+bin/run-migrations.sql run_<fecha>
 ```
 
-### 4. Generar Archivos de Cambios de OSM
+Cada migración corre en su propia transacción y el script se detiene en el primer error. Dos
+controles (102 y 160) detienen la corrida si los conteos de footprints o la clasificación no
+cierran.
+
+### 4. Generar los Conjuntos de Resultados
 
 ```sh
-uv run migrations/500-create-changefiles.py
+.venv/bin/python migrations/500-create-changefiles.py run_<fecha> --live data/live-osm-<fecha>.osm
 ```
 
-Los archivos de cambios estarán disponibles en el directorio `changesets/`,
-organizados en grupos de manzanas.
+La configuración del venv está en el encabezado del script; necesita los bindings de Python de
+GDAL del sistema. Los resultados quedan en `changesets/run_<fecha>/`:
+
+- `new/`: estructuras nuevas, un archivo `.osm` por sección
+- `conflicts/`: conflictos, un archivo `.osm` por manzana, para revisión
+- `reshape/`: un archivo `.osc` por tarea Reshape (grupos Reshape vecinos de una manzana), para
+  un desafío cooperativo de MapRoulette
+
+Antes de la siguiente ronda, revisá los nodos viejos que Reshape dejó sin uso (no sube nada):
+
+```sh
+python3 migrations/510-clean-up-reshape-orphans.py changesets/run_<fecha>
+```
 
 ## Requisitos
 
 - Docker Compose para PostgreSQL/PostGIS
 - Python 3.12+
-- Gestor de paquetes uv
+- Gestor de paquetes uv (para armar `.venv`)
 - GDAL con ogr2ogr
 
 ## Visualización
@@ -102,7 +99,7 @@ organizados en grupos de manzanas.
 Para visualizar los resultados del procesamiento:
 
 ```sh
-bin/export-geojson.sh "SELECT * FROM processed_buildings LIMIT 100" > debug.geojson
+bin/export-geojson.sh "SELECT * FROM run_<fecha>.structures LIMIT 100" > debug.geojson
 ```
 
 Podés abrir el archivo en QGIS o cualquier visor de GeoJSON.
