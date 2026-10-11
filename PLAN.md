@@ -25,6 +25,12 @@ resolve. Informal discussion can continue in the existing forum thread
       A second form exists (found 2026-09-12): `60-138-020B/021`, 5 footprints,
       joins two parcelas inside one SMP. It has only two hyphens, so 040's
       hyphen count never sees it. Repaired the same way.
+      Decision (2026-09-26): both forms are no SMP (1.2), not split and not
+      Outlier SMP. The source has no lot geometry to tell which footprint sits
+      on which lot. 040 sets `smp` NULL with `smp_reason = 'slash-joined'`;
+      the 11 footprints get no cadastral tag and a block key from 4.6.
+      Considered and dropped: split into the two real SMPs (no way to assign
+      footprints); Outlier SMP (publishes `65-125-021/65-125-022` as the tag).
 - [x] **1.4 Keep `Sin parcelario 2017` as a recorded reason,** not discarded.
 - [x] **1.5 Every footprint with an Outlier SMP is a separate building.** Covers
       25 code families plus the 71 ordinary-code parcels above 50 footprints:
@@ -75,6 +81,13 @@ resolve. Informal discussion can continue in the existing forum thread
       ("CoverageUnion cannot process overlapping inputs").
       Considered and dropped: gap `2e-6`° (22 cm, decided first, reversed after
       the real run); snap `1e-6`° (~11 cm) and `2e-7`° (2.2 cm).
+      Rechecked after Phase 1 (2026-09-26), 22 cm against 11 cm snap through
+      090–101 on the 1,723 blocks holding a split footprint (2.6), 273,734
+      footprints: split after 100 2,272 / 574; emptied 813 / 628; moved over
+      2 m 620 / 427; vertices 0–22 cm off a neighbour wall after 100 551 / 39,916
+      (392 / 24,354 footprints). Gate 1 passes both. Kept 22 cm: halving the snap
+      removes three quarters of the splits but leaves tens of thousands of walls
+      that do not share nodes.
       Blocks 3.2 — node sharing only works where 090 made coordinates identical.
 - [x] **2.2 Simplify with `ST_CoverageSimplify(geom, 2e-6, true)` (~22 cm, block
       boundary edges included).** 100 changes from `0.000005`; delete 095.
@@ -162,6 +175,49 @@ resolve. Informal discussion can continue in the existing forum thread
       parts by 080's cut-out, not merged by 070.
       Needs real connected components over `(parcel, altura)`, joined by a
       shared wall, on the geometry after 100.
+- [x] **2.6 Handle footprints 090 splits.** The 22 cm snap (2.1) collapses any
+      part of a footprint narrower than the snap, and `ST_CoverageClean` does
+      not keep a polygon's faces connected, so the footprint comes out
+      multipart. Two causes:
+      - neck: the source footprint narrows below 22 cm (ogr_fid 593006,
+        1028590);
+      - overlap: `MERGE_MAX_AREA` gives an overlap to the larger footprint,
+        and the part of the smaller one beyond it is cut off as a strip
+        (ogr_fid 639500).
+      Decision (2026-09-26): 090 cleans each split footprint again alone, with
+      the same settings. If it splits into at least as many parts alone, the
+      cause is a neck: each piece becomes a footprint of its own (the largest
+      keeps the ogr_fid, the others get new ones) and they form structures
+      by the usual rule (3.3). Otherwise the cause is an overlap, or an overlap
+      and a neck together: the footprint stays whole and multipart, is flagged
+      `split_by_overlap`, and its structure goes to Conflicts with reason
+      "footprint split by an overlap" (4.4). A strip is never published by
+      itself. `split_footprints` records every split footprint, its cause and
+      its neck pieces.
+      Tested on the three examples: necks split 2 / 2 (block / alone), the
+      overlap 2 / 1; two neighbours of 639500 split 4 / 1 and 6 / 1.
+      Measured on the 2026-09-24 run: 2,140 footprints multipart after 100
+      that 080 did not cut. Area lost at the split is about 0. Not yet
+      measured: how many are necks.
+      Considered and dropped: accept every split, each piece a structure;
+      drop strips under a limit (e.g. 1 m²); every split footprint to
+      Conflicts; snap 11 cm (2.1).
+      Found (2026-09-27): 090 and 100 gave a different result on each run of
+      the same input. `ST_CoverageClean` and `ST_CoverageSimplify` depend on
+      the order of a block's footprints, and `PARTITION BY bkey` alone leaves
+      that order undefined. Six runs of 090's cleaning on one pre-090 table:
+      unordered, 255,467 footprints differed between two runs, and the split
+      and NULL or EMPTY counts changed (2,743–2,756 and 3,066–3,072);
+      ordered by `ogr_fid`, three runs (one from a shuffled table) were
+      identical (2,752 and 3,053). 100 unordered: 69,244 footprints
+      differed; ordered: identical. This explains the 2,140 against 2,744
+      split count: each run drew another order.
+      Decision (2026-09-27): 090 and 100 order each block by `ogr_fid`. It is
+      unique, including neck pieces, and the same on each import of one
+      file. No order is known to give better shapes; the order only has to
+      repeat. Considered and dropped: a key from the geometry, which stays
+      the same when a new file reorders its records but costs more and can
+      tie.
 
 ## Phase 3 — Output model
 
@@ -172,6 +228,69 @@ resolve. Informal discussion can continue in the existing forum thread
       boundary nodes. Tag mapping goes in a `TranslationBase` subclass.
       Output is `.osm`, which is the correct format for JOSM-reviewed review.
       Fixes faults 1, 2 and 3 by deletion.
+      Implemented (2026-09-26): 500 uses ogr2osm as a library, not as a
+      command. It reads each result set from PostGIS with one query, builds
+      an in-memory OGR layer per file and runs ogr2osm's `OsmData` on it. The
+      translation keeps untagged rings shared but never merges two tagged
+      ways or relations, so an outline and a base part of the same shape stay
+      two objects on the same nodes (3.3). ogr2osm needs the system GDAL
+      bindings, so 500 runs in a venv made with `--system-site-packages`,
+      not with `uv run` (usage in the script's header).
+      Reshape is written by 500 itself as osmChange (6.3), from ogr2osm's
+      objects: the kept Live object takes the new geometry and keeps its id,
+      version and tags. Provisional choices made in the rewrite, to confirm:
+      - Decision (2026-09-27, height): a kept Live building takes the
+        structure's `height`, replacing any Live value. Of the 409 kept Live
+        buildings with a height on the 2026-09-24 fetch, 202 agree within
+        0.5 m and 210 differ by more; the altura is photogrammetry-derived.
+        Asentamientos informales have no altura, so a Live height stays.
+        Considered and dropped: keeping an existing Live height.
+      - `ref:cadastre` is added to a kept Live building only where it has
+        none; an existing value is never replaced (the 47 on the 2026-09-24
+        fetch all equal ours).
+      - Decision (2026-09-27, old nodes): the old nodes of a replaced or
+        deleted Live way are deleted in the task when they have no tags and no
+        other way or relation in the Live fetch uses them; tagged nodes
+        (entrances, addresses) stay. The fetch holds every way that uses a
+        building node (6.2), so a node shared with a wall or a landuse area is
+        kept. A node shared by two replaced Live ways is kept by both tasks and
+        is unused once both are uploaded; 500 lists these in
+        `reshape-orphans.tsv` and 510 deletes them before the next round,
+        after checking each against current OSM. 510 is also the check that
+        the process worked: a listed node used by anything 500 did not
+        replace means the fetch or the tasks missed something.
+        Measured (2026-09-27, 2026-09-24 fetch, before the fetch change):
+        93,709 old nodes; 71,430 deleted in tasks, 625 kept for tags, 16,288
+        orphaned once every task is uploaded. Simulated locally (every
+        Reshape file applied to the fetch, then 510 against the result): all
+        16,288 are orphaned and no other old untagged node is; no deletion
+        would be refused. 568 tagged old nodes are left on their own
+        (entrances, addresses, `source`). 510 against OSM that day found
+        748 of the 16,288 used by 343 ways the fetch lacked: landuse 169,
+        `addr:interpolation` 38, walls and fences 29, `place=city_block` 7,
+        and school, park and parking areas. The same share (4.6%) of the
+        71,430 would have been refused at upload (412); the fetch change
+        removes this.
+        Considered and dropped: moving the old nodes onto the new shape (a
+        shared node moves the neighbour's wall too); deleting no node (about
+        93,000 untagged nodes left in OSM).
+      - A kept Live multipolygon relation keeps its id and takes the new
+        rings as new member ways; its old member ways are deleted when they
+        have no tags and no other relation in the fetch uses them.
+      - A kept Live way whose new outline keeps a hole becomes the outer ring
+        of a new multipolygon relation, which takes the tags.
+      - A 1:N task file is named after the kept Live building.
+      Run (2026-09-26, schema `run_20260926`, sources of 2026-09-24): the
+      migrations take 13 minutes, 500 about 5. Gate 2: New 371,767, Reshape
+      22,083, Conflicts 36,504 structures. Files: New 1,030 (94 secciones
+      and 936 no-SMP groups, 724 MB), Conflicts 4,984 (82 MB), Reshape
+      18,395 tasks (105 MB). Reshape deletes 71,430 old nodes, 2,048 ways and
+      9 relations; 213 kept Live buildings are relations; 1,120 kept Live ways
+      become the outer ring of a new relation. Checked on every file: no
+      reference to a missing object, no duplicate node, no deleted node still
+      used in the file, every kept outline within 1 cm of its structure, every
+      kept Live building with its version and all its tags. Only multipart
+      outlines and parts are those split by an overlap (2.6), all Conflicts.
 - [x] **3.2 Set `--rounding-digits`** consistently with 2.1.
       Decision: `--rounding-digits 7`, OSM's stored precision (~1.1 cm).
       Rounding moves a point at most ~0.55 cm, below 090's 2.2 cm gap width,
@@ -226,6 +345,17 @@ resolve. Informal discussion can continue in the existing forum thread
       12,327 footprints have holes (source: 3,375); 10,255 have a hole holding
       another footprint (12,060 holes, 16,677 nested footprints); 2,318 have
       empty holes (3.5).
+      Built by 104 into `parts` (sid, ogr_fid, altura, base, geom), one row
+      per footprint of every structure of two or more footprints. 090 moves
+      `nested_geoms` onto neck pieces (2.6). 104 reports structures whose
+      parts do not fill the outline; it does not stop the run.
+      Dry run on the 2026-09-24 run (2026-09-26): 1,029,006 parts in 251,477
+      structures, 4,066 base parts, 1,821 multipart parts (the 2,140 splits
+      of 2.6, before 2.6 existed). 1,695 structures differ from their outline
+      by over 0.01 m² (742 m² in all, at most 3.4 m²). Every difference checked is
+      gaps under 1 m² enclosed between footprints: the outline fills them
+      (3.5), no part covers them, and no part reaches outside the outline.
+      Accepted: a 3D renderer shows a gap under 1 m² in such a structure.
       Considered and dropped: minimal S3DB (outline not filled, so 3D
       renderers lose the lower portion); keeping 080's cut-outs (~10k
       multipolygon relations, two buildings for one structure); side-by-side
@@ -247,7 +377,15 @@ resolve. Informal discussion can continue in the existing forum thread
       Carried by every `building=yes` way (outline or one-footprint structure) only,
       never by `building:part` ways (3.3). No tag on asentamientos informales or no-SMP footprints
       (1.2, 1.5).
-      Considered and dropped: `smp`; an authority-namespaced key; tagging parts.
+      Decision (2026-09-26, spelling): the value is the SMP as the source spells
+      it (`40-075-003B`), after 1.6's Ñ repair, not the normalized key
+      (`40-75-003B`, 1.1). The two differ on 272,207 structures of the
+      2026-09-24 run; the 47 Live buildings that carry the tag use the source
+      spelling. 103 writes it to `structures.ref_cadastre`. Where a parcel's
+      footprints spell it differently (one parcel: `095-064A-001` /
+      `95-064A-001`), the most common spelling wins.
+      Considered and dropped: `smp`; an authority-namespaced key; tagging parts;
+      the normalized key as the value.
 - [x] **3.5 The 3,375 source footprints with interior rings** (0.24%). Route to
       Conflicts, emit relations for them only, or fill them in.
       Decision: fill every interior ring smaller than 1 m² (`ST_Area` on
@@ -517,6 +655,8 @@ resolve. Informal discussion can continue in the existing forum thread
       Reshape.)
       Decision (2026-09-13): these seven subtypes are the list. It is not
       closed: a new cause found later is added as a new subtype.
+      Added (2026-09-26): footprint split by an overlap (2.6). It is decided
+      before any Live check, and it holds the structure's whole link group.
       Decision (reasons, 2026-09-13): reasons are not published. No tag, no
       side file. The pipeline's database keeps every reason that applies to
       each structure; a question about a rejection is answered with a query.
@@ -524,6 +664,13 @@ resolve. Informal discussion can continue in the existing forum thread
       (JOSM reports `fixme` only at the "Other" level, hidden by default in
       the validator and at upload, so it can reach OSM unseen); a `.geojson`
       file of reasons next to each Conflicts file (no tooling yet).
+      Implemented (2026-09-27): `classification.reasons` and
+      `live_groups.reasons` are text arrays holding every reason that applies,
+      NULL for New and Reshape. The neighbour rule (140) also marks groups
+      already in Conflicts, so "overlaps an OSM building that stays" is
+      recorded beside their other reasons. On run_20260926 no result changed:
+      of 36,504 Conflicts structures, 32,299 have one reason, 3,823 two and
+      382 three.
       Decision (OSM-only, 2026-09-13): dropped. The import covers only
       buildings the dataset has. An OSM building with no structure beneath it
       is not classified, not listed, not counted and never changed.
@@ -652,9 +799,11 @@ resolve. Informal discussion can continue in the existing forum thread
       - Gate 1, after 100 and the merge that follows it (2.5; no Live needed):
         every block is a valid coverage
         (`ST_CoverageInvalidEdges` empty); no NULL or EMPTY geometry; no
-        multipart footprint; footprint counts reconcile per migration.
-        Counts hold at the source count from 020 to 100 and fall only at the
-        merge (2.5) and at 090's drop of NULL and EMPTY geometry (2.3).
+        multipart footprint except those 080 cut (`nested_geoms` container)
+        and those split by an overlap (2.6); footprint counts reconcile per
+        migration. Counts hold at the source count from 020 to 100 except at
+        090, which drops NULL and EMPTY geometry (2.3) and adds neck pieces
+        (2.6); they fall at the merge (2.5).
       - Gate 2, after classification, before 500: every structure is in
         exactly one result set; no New structure overlaps a Live building;
         no structure is split across files.
@@ -663,6 +812,19 @@ resolve. Informal discussion can continue in the existing forum thread
       the merge's multipart check (2.5), a no-SMP group reaching two blocks
       (4.6).
       Considered and dropped: report only, with no gate.
+      Implemented (2026-09-27, count reconciliation): a ledger table,
+      `footprint_counts`. The import writes the GeoJSON feature count
+      (`ogrinfo`) and the imported count; 020, 030, 090 (neck pieces added,
+      NULL or EMPTY dropped, the latter counted from `cleaned_away`) and 101
+      each append what they removed and added and the count after them
+      (`log_footprints`, 005). Gate 1 stops the run when a row is not the
+      row before it less its removals plus its additions, or when the count
+      now differs from the last row. Migrations that only update rows
+      cannot change the count; a change between two rows fails at the next
+      one. Test on the 09-24 inputs: 1,386,616 source features, 11,713
+      removed by 020, 30 by 030, 2,557 neck pieces added and 3,063 dropped
+      by 090, 164,774 merged away by 101, 1,209,593 at Gate 1. One
+      footprint deleted before Gate 1 stopped the run.
 - [ ] **5.2 Build the city-side integrity suite.** Count reconciliation per
       migration; coverage validity (`ST_CoverageInvalidEdges`); validity and
       emptiness; Hausdorff displacement and area drift; vertex counts and
@@ -706,12 +868,42 @@ resolve. Informal discussion can continue in the existing forum thread
       decision above: a mapper who moves a wall 3 m drops under 0.9 and gets our
       shape back. A union of both tests would cover the 20,547 structures with
       no tag as well. Decide with the round-1 result in hand.
+      Decision (2026-09-27, where the tag cannot decide): the import account.
+      Round 1 now runs in two steps (6.3), so the decision is needed between
+      the New upload and the Reshape run, not after round 1. A Live building
+      whose last editor is the import account is our upload, unedited since;
+      the structure it links to (4.3) is already in Live. The fetch holds each
+      object's last uid and changeset (`out meta`), so no tag and no shape
+      test is needed. A building a mapper edits between the upload and the
+      fetch is not recognised this way; the tag rule still skips it where the
+      SMP names one structure. Considered and dropped: the same shape at the
+      7-digit grid, and IoU >= 0.9 (above); the list of way ids the upload
+      returns, which also recognises edited buildings but needs the upload
+      script to keep it. To count the edited ones, 125 reports the structures
+      left with a Live building of IoU >= 0.9; the run before the upload gives
+      the count to compare.
+      Found (2026-09-27): the tag is not only our own upload. In the Live
+      fetch of 2026-09-27, 47 buildings carry `ref:cadastre=45-098-0000` and
+      `source=GCBA - BA Data`, imported by hand by ignaciolep in July 2026 from
+      the same dataset. They are skipped by the tag rule, as decided above.
+      Implemented (2026-09-27): 125 builds `already_in_live` (sid and which
+      rule) and removes those structures from `structure_shapes` and
+      `contacts`, so 130-160 never see them; their Live buildings stay, as
+      OSM buildings that stay. `bin/import-datasets.sh` keeps each Live
+      building's uid and stores the import account's uid from `IMPORT_UID`
+      (unset before the account uploads anything). Gate 2 adds the skipped
+      structures to its count. Tested on `run_20260927` (no import account
+      yet, rolled back): 47 structures skipped by the tag rule, all 1:1
+      Reshape before; 513 structures left with a Live building of IoU >= 0.9.
+      Where several structures share an SMP, a Live building with the tag
+      must also link to the structure.
 
 ## Phase 6 — Publication
 
-- [ ] **6.1 Freeze the baseline.** Move `data/live-osm-data.geojson` to
+- [x] **6.1 Freeze the baseline.** Move `data/live-osm-data.geojson` to
       `fixtures/live-osm-2025-10-05.geojson`. Never derive a result set from it.
-- [ ] **6.2 Script the live fetch** with `out meta;` as raw `.osm`. A hand-run
+      Done (2026-09-27): moved; `*.geojson` keeps it out of git.
+- [x] **6.2 Script the live fetch** with `out meta;` as raw `.osm`. A hand-run
       Overpass export at the last moment is the step most likely to differ from
       what you calibrated against.
       The query must also fetch `building:part` ways and relations (4.3's
@@ -719,11 +911,26 @@ resolve. Informal discussion can continue in the existing forum thread
       features, all carry `building`; none is a part only.
       The query must be bounded to the CABA boundary, not a bbox or name
       search: the Baseline holds 2,745 buildings outside Argentina.
+      Script (2026-09-27): `bin/fetch-live.sh`. Besides buildings and parts,
+      their members and nodes, it fetches (without their nodes) every way
+      that uses one of those nodes and every relation that holds one of those
+      ways, so 500 knows what else uses an old node or way (3.1). `BBOX=`
+      fetches a small area for tests. The import filter keeps only buildings
+      and parts, so `live_buildings` does not change. Run on the whole city
+      on 2026-09-27 (`data/live-osm-2026-09-27.osm`, `run_20260927`); the
+      2026-09-24 fetch used the old query.
+      Import (2026-09-26): `bin/osmconf-buildings.ini` keeps every tag and the
+      version of each Live building (`[multipolygons]`: `osm_version=yes`,
+      empty `ignore`). GDAL's default list dropped `source`, `note`, `fixme`
+      and others: 1,779 Live buildings on the 2026-09-24 fetch carry one of
+      the first three, 212 of them with nothing else beside `building=yes`,
+      which 4.3 then treated as untagged. Reshape needs the version.
 - [x] **6.3 Publish New and Conflicts as files; Reshape as a MapRoulette
       cooperative challenge.** New and Conflicts files linked from the OSM
       Argentina forum thread (4.6: 1 seccion per New file since 2026-09-15,
       1 block per Conflicts file). Reshape has no block file since 2026-09-24;
-      it is one MapRoulette task per Live building.
+      it is one MapRoulette task per cluster of neighbouring Reshape groups
+      (since 2026-09-27; before, one per Live building).
       Decision (2026-09-15, who uploads New): the import account (6.7), in one
       scripted run over the 94 seccion files, after the admins consent (6.6).
       A changeset holds at most 10,000 elements, so New is about 840 changesets
@@ -732,7 +939,8 @@ resolve. Informal discussion can continue in the existing forum thread
       single query (6.8).
       Decision (2026-09-24, Reshape venue): a MapRoulette cooperative change
       challenge, one task per Live building (23,592 tasks, 4.3's Reshape
-      groups). A cooperative change task carries a JOSM `.osm` or `.osc` file
+      groups). The task unit was changed on 2026-09-27: see the decision on
+      duplicate nodes between Reshape tasks below. A cooperative change task carries a JOSM `.osm` or `.osc` file
       that MapRoulette loads into the mapper's editor as work in progress on
       top of OSM; the mapper checks it, adjusts it if needed, and uploads it
       from their own account, the same as any other edit.
@@ -747,7 +955,9 @@ resolve. Informal discussion can continue in the existing forum thread
       500 must emit the change file with each Live way's id and version, which
       6.2's `out meta` already fetches; `mr-cli`'s default splitting makes one
       task per top-level modification, and a Reshape group's replaced Live way
-      is one such modification, so no `--bijective` grouping is needed. Round 2
+      is one such modification, so no `--bijective` grouping is needed
+      (superseded on 2026-09-27: a task now holds a cluster of groups and
+      needs `--bijective`). Round 2
       waits until volunteers process round 1's 23,592 tasks, unlike New, which
       moves at the import account's own pace.
       Considered and dropped: 5-block JOSM files uploaded by the import
@@ -774,8 +984,62 @@ resolve. Informal discussion can continue in the existing forum thread
       published in round 1 must reuse that building's Live nodes; 3.1 only
       deduplicates nodes inside one output, so otherwise JOSM warns about
       duplicate nodes.
-- [ ] **6.4 Update the artifact and `CONTEXT.md`** to match the settled model.
+      Decision (2026-09-27, duplicate nodes between Reshape and New): round 1
+      runs in two steps. First the import account uploads New. Then Live is
+      fetched again, the pipeline runs again, and 500 writes the Reshape
+      tasks from that fetch. Where a Reshape structure has a node at the
+      exact position of a Live node (7 decimals, the precision OSM stores),
+      the task uses that node and creates none. A New building beside a
+      Reshape building then shares its wall nodes, and no cleanup is needed.
+      Consequences: skipping already-imported structures (5.3) is needed
+      before the Reshape step of round 1, not only before round 2, because
+      the second run sees every New building in Live; node reuse, planned
+      above for round 2, is needed in round 1. Duplicate nodes between two
+      Reshape tasks are not fixed by this.
+      Considered and dropped: one sentence in the forum post, leaving the
+      duplicates to mappers; a cleanup changeset after each round; moving a
+      New structure that touches a Reshape group into its task.
+      Implemented (2026-09-27, node reuse): 500 builds every Reshape task
+      first, then writes them. A new node at the exact position of a Live
+      node that a way uses (7 digits; the lowest id where two Live nodes share
+      a position) becomes that node, and no task deletes or lists as orphan
+      a node any task reuses. Standalone Live nodes (POIs) are never reused.
+      Measured on `run_20260927` (before any upload): 288 nodes reused, none
+      tagged, none shared by two files, none deleted by any task; 206 of them
+      on Live building ways, the rest on untagged multipolygon member ways.
+      Old nodes deleted: 80,972 (287 fewer than without reuse); 510: 884
+      pending, 0 unexpected uses.
+      Decision (2026-09-27, duplicate nodes between Reshape tasks): Reshape
+      groups that neighbour each other form one task, and one file. Inside a
+      file ogr2osm merges nodes at one position, so the shared walls get one
+      set of nodes. A task cannot reach past its block. Cost: larger tasks,
+      which a reviewer accepts or rejects whole, and more upload conflicts. A
+      task is no longer one top-level modification, so `mr-cli` needs one
+      task per file (`--bijective`).
+      Decision (2026-09-27, neighbours): two Reshape groups are neighbours
+      when a structure of one shares a node position with a structure of the
+      other, the case that makes duplicate nodes. Neighbours of neighbours
+      join the same task. Considered and dropped: also joining groups whose
+      Live buildings share an old node. It would keep more of those nodes
+      off the orphan list (510), but makes larger tasks; where the new
+      structures also touch, the task already deletes the shared node.
+      Implemented (2026-09-27): 170 builds `reshape_tasks` with `cc_run` over
+      Reshape structures that touch in one block; 500 builds each task with
+      one ogr2osm run and one file, named by the Live building its first
+      group keeps, and deletes an old node when every way that uses it is
+      replaced in that task. Measured (`run_20260927`, Live fetched
+      2026-09-27): 18,389 Reshape groups (19,919 Live buildings, 22,078
+      structures) in 10,628 tasks; 8,153 tasks hold one group, 2,475 hold two
+      or more, 46 hold 20 or more, and the largest holds 38 groups (39
+      structures, block 89-60). The next two largest (33 and 31 groups) are
+      in the same seccion. Old nodes left for 510: 884; 510 found 0
+      unexpected uses.
+- [x] **6.4 Update the artifact and `CONTEXT.md`** to match the settled model.
       The artifact still says conflation is out of scope.
+      Done (2026-09-27): the catch-up page ("Buenos Aires Building Import")
+      rewritten from `run_20260927`: inputs, terms, the 005-510 steps with
+      both gates, the three result sets and rounds, state, open items.
+      `CONTEXT.md` names where the Baseline lives.
 - [ ] **6.5 Commit and push.** 3 local commits plus the working tree are
       unpushed. `095-aggressive-simplification.sqlx` and the `breakpoint()` go
       away as part of 2.2 and 2.3.
@@ -788,10 +1052,26 @@ resolve. Informal discussion can continue in the existing forum thread
       and no source data exists; and it promises `ref:cadastre=*` while the code
       emits `smp=` (3.4 decided `ref:cadastre`, so only the code changes). Also
       describe the Simple 3D outline + parts model (3.3).
+      Done (2026-09-27): `import.wikitext` rewritten to the settled model: no
+      `building:levels`, `ref:cadastre` on outlines only, outline + parts,
+      asentamientos informales and Outlier SMPs, preparation steps, the
+      link rule and the three result sets with the Conflicts subtypes, the
+      two-step round 1 with node reuse, skipping already-imported
+      structures, MapRoulette Reshape tasks of neighbouring groups, the
+      import account, a timeline, and the counts of `run_20260927`. The
+      revert procedure is described too (6.8).
 - [ ] **6.7 Register the dedicated `(username)_Import` account.** Required by the
       Guidelines. Independent of everything else — can be done at any point.
-- [ ] **6.8 Write the revert procedure.** The Guidelines require knowing how to
+- [x] **6.8 Write the revert procedure.** The Guidelines require knowing how to
       revert before the first upload.
+      Decision (2026-09-27): every import changeset carries the hashtag
+      `#tejido-urbano-caba` in its comment: New from the import account, and
+      Reshape through the comment the MapRoulette challenge proposes.
+      Done (2026-09-27): `import.wikitext`, "Cuenta de importación y
+      reversión": list the changesets (the import account for New, the
+      hashtag for Reshape; OSMCha filters both), revert them with osm-revert
+      or the JOSM Reverter plugin, resolve conflicts with later edits by hand
+      in JOSM, announce the revert in the forum thread.
 - [ ] **6.9 Tag every changeset with `source=*`.** Decision (2026-09-24): not a
       tag on footprints. OSM's modern practice puts `source=*` on the
       changeset, not on individual objects (wiki Key:source: "should
@@ -815,3 +1095,28 @@ resolve. Informal discussion can continue in the existing forum thread
       and Reshape's per-task MapRoulette changesets, pre-filled the same way
       the changeset comment already is (6.3's citation of the cooperative
       tutorial).
+      Found (2026-09-27): the actualización date is the package's
+      `metadata_modified` (CKAN API), which moves with metadata edits alone.
+      The GeoJSON resource says `last_modified` 2021-05-10, the CDN answers
+      `Last-Modified: Mon, 10 May 2021`, the description says "contiene datos
+      hasta el 2021" and `updateFrequency` is `historico`. The 2025-07-17 and
+      2026-09-24 downloads are byte-identical. The data is a 2021 snapshot:
+      buildings built or demolished since are not in it.
+      Implemented (2026-09-27): `<date>` is the file's `Last-Modified`.
+      `bin/download-dataset.sh` writes `data/tejido-<download date>.geojson`
+      and beside it `.source` with the tag; `bin/import-datasets.sh` refuses a
+      Tejido with no `.source` and stores the tag in `changeset_source`.
+      `data/tejido-2026-09-24.source` written by hand (2021-05-10) and
+      `run_20260927.changeset_source` filled. The city-side freeze above is
+      settled by the same means: each run names its dated file, and the
+      `.source` date shows whether the city changed the data. Still to do:
+      the upload script for New and the MapRoulette challenge's source field
+      read `changeset_source`; neither exists yet.
+      Decision (2026-09-27): the local copy `data/tejido-2026-09-24.geojson`
+      serves every round; the dataset is not expected to change in the short
+      term. Its `.source` holds the tag; a fresh download is needed only if
+      the city publishes new data.
+      Decision (2026-09-27, data older than Live): no rule for buildings
+      built or demolished since 2021. A structure demolished since then and
+      absent from Live is New; slightly outdated data is better than none.
+      The wiki states the date of the data.

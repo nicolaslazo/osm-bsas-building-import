@@ -11,7 +11,8 @@ overloaded, from the source dataset, from OSM, and from cadastral practice.
 
 **Footprint**:
 One row of `city_data`: a single photogrammetry-derived polygon with one `altura`. The unit
-migrations count. Classification runs on structures, not footprints.
+migrations count. Where coverage cleaning cuts a footprint at a neck of its own, each piece
+becomes a footprint. Classification runs on structures, not footprints.
 _Avoid_: building, polygon, geom, shape
 
 **Parcel**:
@@ -32,15 +33,16 @@ _Avoid_: building (the OSM object), complex, group, cluster
 **Block**:
 A `(seccion, manzana)` pair. The partition for every coverage operation, and the grouping unit
 for review in the Conflicts files; a New file holds one seccion, and Reshape is reviewed one
-Live building at a time on MapRoulette, not by block. Footprints with no SMP have no pair: those connected through gaps of at most 22 cm
+Reshape task at a time on MapRoulette; a Reshape task never reaches past its block. Footprints with no SMP have no pair: those connected through gaps of at most 22 cm
 form a group; a group within 22 cm of a block's footprint joins that block, and any other
 group is a block by itself.
 _Avoid_: manzana (ambiguous with the middle SMP component alone), city block, cuadra
 
 **SMP**:
 A cadastral reference formatted `seccion-manzana-parcela` (e.g. `87-006A-015`). Components may
-contain letters; that is normal, not a defect. Published as `ref:cadastre` on every
-`building=yes` way, never on a building part.
+contain letters; that is normal, not a defect. Published as `ref:cadastre`, in the source's
+spelling, on every `building=yes` way, never on a building part. A slash-joined code
+(`65-125-021/65-125-022`) names two lots and counts as no SMP.
 _Avoid_: cadastral code, ID, ref
 
 **Outlier SMP**:
@@ -58,8 +60,8 @@ _Avoid_: BEM parcel, slum, villa
 ### OSM-side
 
 **Baseline**:
-The frozen `2025-10-05` OSM export. Used only to calibrate classification thresholds. No result
-set is ever derived from it.
+The frozen `2025-10-05` OSM export, `fixtures/live-osm-2025-10-05.geojson`. Used only to
+calibrate classification thresholds. No result set is ever derived from it.
 _Avoid_: live data, live_buildings, current OSM, snapshot
 
 **Live**:
@@ -100,18 +102,29 @@ footprints are taken as more accurate than the OSM shape. The pipeline
 decides this before publication; the JOSM conflation plugin only helps review it.
 _Avoid_: update, replace, conflate, merge
 
+**Reshape task**:
+The Reshape link groups of one block whose structures share a node position, directly or
+through a chain of such groups. One file and one MapRoulette task, which a mapper accepts or
+rejects whole; inside it, walls two groups share get one set of nodes. Most tasks hold one
+group.
+_Avoid_: cluster, bundle, challenge (the MapRoulette container of all tasks)
+
 **Conflicts**:
-Structures whose overlap against Live is too ambiguous to classify automatically, each with
-reason subtypes kept in the pipeline's database. Reasons are never published. OSM buildings with no structure beneath them are out of scope: never
+Structures whose overlap against Live is too ambiguous to classify automatically, or that
+hold a footprint coverage cleaning split through an overlap with a neighbour footprint, each
+with reason subtypes kept in the pipeline's database. Reasons are never published. OSM buildings with no structure beneath them are out of scope: never
 classified, listed or changed.
 _Avoid_: outliers (reserved for Outlier SMP), rejects, errors, leftovers
 
 **Release round**:
 One pass of fetch Live, run the pipeline, publish. Round 1 publishes New and Reshape and holds
-Conflicts; once it is processed, round 2 reruns against a fresh Live and publishes all three
-result sets. Before classification, each round skips every structure already in Live: matched
-by `ref:cadastre` whatever its shape, or geometrically where the tag cannot decide (which
-geometric test is settled after round 1).
+Conflicts, in two steps: New is uploaded first; then Live is fetched again, the pipeline runs
+again, and the Reshape tasks come from that fetch, using the Live node at the exact position of
+each new node, so a Reshape building shares its wall nodes with the New building beside it.
+Once round 1 is processed, round 2 reruns against a fresh Live and publishes all three
+result sets. Before classification, each run skips every structure already in Live: matched
+by `ref:cadastre` whatever its shape, or, where the tag cannot decide, by a linked Live
+building whose last editor is the import account.
 _Avoid_: batch (ambiguous with result set and with per-block files), iteration, phase
 
 ### Attributes
