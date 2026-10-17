@@ -3,6 +3,7 @@
 
 Usage:
     python migrations/500-create-changefiles.py SCHEMA [--live data/live-osm-YYYY-MM-DD.osm] [--out DIR]
+                                                [--blocks BKEY,BKEY,...]
 
 Reads structures, parts and classification and reshape_tasks from SCHEMA (migrations 103-170) and writes:
     DIR/new/seccion-NN.osm       New, one file per seccion
@@ -13,7 +14,8 @@ Reads structures, parts and classification and reshape_tasks from SCHEMA (migrat
                                  cooperative challenge
     DIR/reshape-orphans.tsv      old nodes left unused once every Reshape task is uploaded
                                  (checked and deleted by 510 before the next round)
-DIR defaults to changesets/SCHEMA and is replaced.
+DIR defaults to changesets/SCHEMA and is replaced. --blocks writes only the structures of those
+blocks (the pilot).
 
 Geometry goes through ogr2osm: a way per ring-less polygon, a multipolygon relation where holes
 remain, nodes shared by rounded coordinate (7 digits, 3.2). A structure of one footprint is a
@@ -136,11 +138,11 @@ FEATURES_SQL = """
 SELECT k.result, s.sid, s.bkey, s.ref_cadastre, s.height, s.asentamiento_informal, NULL::float8,
        ST_AsBinary(s.geom), 0 AS ord
 FROM structures s JOIN classification k USING (sid)
-WHERE k.result = %(result)s
+WHERE k.result = %(result)s AND (%(blocks)s::text[] IS NULL OR s.bkey = ANY(%(blocks)s))
 UNION ALL
 SELECT k.result, p.sid, s.bkey, NULL, NULL, NULL, p.altura, ST_AsBinary(p.geom), 1
 FROM parts p JOIN structures s USING (sid) JOIN classification k USING (sid)
-WHERE k.result = %(result)s
+WHERE k.result = %(result)s AND (%(blocks)s::text[] IS NULL OR s.bkey = ANY(%(blocks)s))
 ORDER BY 3, 2, 9
 """
 
@@ -153,7 +155,7 @@ def file_key(result, bkey):
     return os.path.join("new", "seccion-%s.osm" % bkey.split("-")[0].zfill(2))
 
 
-def write_block_files(conn, out, result):
+def write_block_files(conn, out, result, blocks):
     """New or Conflicts: plain JOSM .osm files, one per file key. Rows arrive ordered by block,
     and the blocks of one seccion sort together, so each file is written as soon as it ends."""
     counts = defaultdict(lambda: [0, 0])
@@ -166,7 +168,7 @@ def write_block_files(conn, out, result):
 
     with conn.cursor(name="features_" + result) as cur:
         cur.itersize = 20000
-        cur.execute(FEATURES_SQL, {"result": result})
+        cur.execute(FEATURES_SQL, {"result": result, "blocks": blocks})
         for res, sid, bkey, ref, height, informal, altura, wkb, ord_ in cur:
             key = file_key(res, bkey)
             if key != current:
@@ -220,11 +222,12 @@ RESHAPE_FEATURES_SQL = """
 SELECT t.task, k.grp, s.sid, s.ref_cadastre, s.height, s.asentamiento_informal, NULL::float8,
        ST_AsBinary(s.geom), 0
 FROM structures s JOIN classification k USING (sid) JOIN reshape_tasks t USING (grp)
-WHERE k.result = 'R'
+WHERE k.result = 'R' AND (%(blocks)s::text[] IS NULL OR s.bkey = ANY(%(blocks)s))
 UNION ALL
 SELECT t.task, k.grp, p.sid, NULL, NULL, NULL, p.altura, ST_AsBinary(p.geom), 1
-FROM parts p JOIN classification k USING (sid) JOIN reshape_tasks t USING (grp)
-WHERE k.result = 'R'
+FROM parts p JOIN structures s USING (sid) JOIN classification k USING (sid)
+JOIN reshape_tasks t USING (grp)
+WHERE k.result = 'R' AND (%(blocks)s::text[] IS NULL OR s.bkey = ANY(%(blocks)s))
 ORDER BY 1, 2, 3, 9
 """
 
@@ -399,7 +402,7 @@ def rel_xml(parent, rel, version, tags):
         etree.SubElement(el, "tag", k=k, v=v)
 
 
-def write_reshape(conn, out, live_path):
+def write_reshape(conn, out, live_path, blocks):
     reshape = Reshape(read_live(live_path))
     groups = defaultdict(lambda: {"st": [], "live": []})
     with conn.cursor() as cur:
@@ -419,7 +422,7 @@ def write_reshape(conn, out, live_path):
     pending = []
     with conn.cursor(name="reshape_features") as cur:
         cur.itersize = 20000
-        cur.execute(RESHAPE_FEATURES_SQL)
+        cur.execute(RESHAPE_FEATURES_SQL, {"blocks": blocks})
         rows, extra, grps, current = [], {}, [], None
         for task, grp, sid, ref, height, informal, altura, wkb, ord_ in cur:
             if task != current and current is not None:
@@ -477,6 +480,7 @@ def main():
     parser.add_argument("schema")
     parser.add_argument("--live", default=(sorted(glob.glob("data/live-osm-*.osm")) or [None])[-1])
     parser.add_argument("--out")
+    parser.add_argument("--blocks", type=lambda s: s.split(","), help="only these blocks, e.g. 87-9A,87-10")
     args = parser.parse_args()
     out = args.out or os.path.join("changesets", args.schema)
     if not args.live:
@@ -490,10 +494,10 @@ def main():
     conn.set_session(readonly=True)
 
     for result, name in (("N", "New"), ("C", "Conflicts")):
-        counts = write_block_files(conn, out, result)
+        counts = write_block_files(conn, out, result, args.blocks)
         print("%s: %d files, %d structures, %d parts" % (
             name, len(counts), sum(c[0] for c in counts.values()), sum(c[1] for c in counts.values())))
-    written, n_groups, stats = write_reshape(conn, out, args.live)
+    written, n_groups, stats = write_reshape(conn, out, args.live, args.blocks)
     print("Reshape: %d task files of %d groups" % (written, n_groups))
     for k, v in sorted(stats.items()):
         print("  %s: %d" % (k, v))
