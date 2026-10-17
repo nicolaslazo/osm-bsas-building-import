@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<osmChange version="0.6" generator="osm-bsas-building-import">
+  <create>
+    <node id="-1" lat="-34.6372041" lon="-58.4826982"/>
+    <node id="-2" lat="-34.6373082" lon="-58.4826584"/>
+    <node id="-3" lat="-34.6373199" lon="-58.4827032"/>
+    <node id="-4" lat="-34.6373159" lon="-58.4827047"/>
+    <node id="-5" lat="-34.637327" lon="-58.4827472"/>
+    <node id="-6" lat="-34.6372845" lon="-58.4827634"/>
+    <node id="-7" lat="-34.6373033" lon="-58.4828351"/>
+    <node id="-8" lat="-34.637234" lon="-58.4828616"/>
+    <node id="-9" lat="-34.6372168" lon="-58.4828682"/>
+    <node id="-10" lat="-34.6371847" lon="-58.482745"/>
+    <node id="-11" lat="-34.6372018" lon="-58.4827385"/>
+    <node id="-12" lat="-34.6372134" lon="-58.482734"/>
+    <node id="-15" lat="-34.6372711" lon="-58.482712"/>
+    <way id="-14">
+      <nd ref="-8"/>
+      <nd ref="-9"/>
+      <nd ref="-10"/>
+      <nd ref="-11"/>
+      <nd ref="-8"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+    <way id="-16">
+      <nd ref="-12"/>
+      <nd ref="-1"/>
+      <nd ref="-2"/>
+      <nd ref="-3"/>
+      <nd ref="-4"/>
+      <nd ref="-5"/>
+      <nd ref="-6"/>
+      <nd ref="-15"/>
+      <nd ref="-12"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+    <way id="-17">
+      <nd ref="-11"/>
+      <nd ref="-12"/>
+      <nd ref="-15"/>
+      <nd ref="-6"/>
+      <nd ref="-7"/>
+      <nd ref="-8"/>
+      <nd ref="-11"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="5.6"/>
+    </way>
+  </create>
+  <modify>
+    <way id="629831611" version="1">
+      <nd ref="-1"/>
+      <nd ref="-2"/>
+      <nd ref="-3"/>
+      <nd ref="-4"/>
+      <nd ref="-5"/>
+      <nd ref="-6"/>
+      <nd ref="-7"/>
+      <nd ref="-8"/>
+      <nd ref="-9"/>
+      <nd ref="-10"/>
+      <nd ref="-11"/>
+      <nd ref="-12"/>
+      <nd ref="-1"/>
+      <tag k="building" v="yes"/>
+      <tag k="height" v="5.6"/>
+      <tag k="ref:cadastre" v="54-119A-001E"/>
+    </way>
+  </modify>
+  <delete>
+    <node id="5948231735" version="1" lat="-34.6372073" lon="-58.4828704"/>
+    <node id="5948231736" version="1" lat="-34.6372948" lon="-58.4828389"/>
+    <node id="5948231737" version="1" lat="-34.6372767" lon="-58.4827649"/>
+    <node id="5948231738" version="1" lat="-34.6373181" lon="-58.4827500"/>
+    <node id="5948231739" version="1" lat="-34.6372972" lon="-58.4826642"/>
+    <node id="5948231740" version="1" lat="-34.6371909" lon="-58.4827025"/>
+    <node id="5948231741" version="1" lat="-34.6372005" lon="-58.4827420"/>
+    <node id="5948231742" version="1" lat="-34.6371779" lon="-58.4827502"/>
+  </delete>
+</osmChange>

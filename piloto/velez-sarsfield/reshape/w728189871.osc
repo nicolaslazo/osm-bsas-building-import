@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<osmChange version="0.6" generator="osm-bsas-building-import">
+  <create>
+    <node id="-1" lat="-34.6360494" lon="-58.4850584"/>
+    <node id="-2" lat="-34.6361493" lon="-58.4850219"/>
+    <node id="-3" lat="-34.63616" lon="-58.485018"/>
+    <node id="-4" lat="-34.636212" lon="-58.484999"/>
+    <node id="-5" lat="-34.6362382" lon="-58.4849894"/>
+    <node id="-6" lat="-34.63629" lon="-58.4849705"/>
+    <node id="-7" lat="-34.6363159" lon="-58.484961"/>
+    <node id="-8" lat="-34.6363694" lon="-58.4849415"/>
+    <node id="-9" lat="-34.6363973" lon="-58.4849313"/>
+    <node id="-10" lat="-34.6364401" lon="-58.4849156"/>
+    <node id="-11" lat="-34.636447" lon="-58.4849131"/>
+    <node id="-12" lat="-34.6366099" lon="-58.4848536"/>
+    <node id="-13" lat="-34.6366241" lon="-58.4849144"/>
+    <node id="-14" lat="-34.6366336" lon="-58.4849554"/>
+    <node id="-15" lat="-34.6361442" lon="-58.4851376"/>
+    <node id="-16" lat="-34.6360739" lon="-58.4851637"/>
+  </create>
+  <modify>
+    <way id="728189871" version="3">
+      <nd ref="-1"/>
+      <nd ref="-2"/>
+      <nd ref="-3"/>
+      <nd ref="-4"/>
+      <nd ref="-5"/>
+      <nd ref="-6"/>
+      <nd ref="-7"/>
+      <nd ref="-8"/>
+      <nd ref="-9"/>
+      <nd ref="-10"/>
+      <nd ref="-11"/>
+      <nd ref="-12"/>
+      <nd ref="-13"/>
+      <nd ref="-14"/>
+      <nd ref="-15"/>
+      <nd ref="-16"/>
+      <nd ref="-1"/>
+      <tag k="addr:city" v="Ciudad Autónoma de Buenos Aires"/>
+      <tag k="addr:country" v="AR"/>
+      <tag k="addr:housenumber" v="4140"/>
+      <tag k="addr:postcode" v="1407"/>
+      <tag k="addr:street" v="Coronel Ramón Lorenzo Falcón"/>
+      <tag k="building" v="yes"/>
+      <tag k="height" v="2.8"/>
+      <tag k="ref:cadastre" v="54-094-004B"/>
+      <tag k="shop" v="car_repair"/>
+    </way>
+  </modify>
+  <delete>
+    <node id="6823792949" version="2" lat="-34.6360603" lon="-58.4851656"/>
+    <node id="6823792950" version="2" lat="-34.6360359" lon="-58.4850657"/>
+    <node id="6823792951" version="2" lat="-34.6366358" lon="-58.4848495"/>
+    <node id="6823792952" version="2" lat="-34.6366602" lon="-58.4849496"/>
+  </delete>
+</osmChange>

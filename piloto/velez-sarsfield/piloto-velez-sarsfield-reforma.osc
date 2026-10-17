@@ -1,0 +1,1136 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<osmChange version="0.6" generator="osm-bsas-building-import">
+  <create><node id="-1" lat="-34.6364802" lon="-58.4851246"/>
+    <node id="-2" lat="-34.6364877" lon="-58.4851218"/>
+    <node id="-3" lat="-34.6365183" lon="-58.4851104"/>
+    <node id="-4" lat="-34.6366579" lon="-58.4850597"/>
+    <node id="-5" lat="-34.6366662" lon="-58.485095"/>
+    <node id="-6" lat="-34.6366911" lon="-58.4852022"/>
+    <node id="-7" lat="-34.6367061" lon="-58.4852664"/>
+    <node id="-8" lat="-34.6367075" lon="-58.4852726"/>
+    <node id="-9" lat="-34.6366727" lon="-58.4852859"/>
+    <node id="-10" lat="-34.6366326" lon="-58.4853012"/>
+    <node id="-11" lat="-34.6365993" lon="-58.4853139"/>
+    <node id="-12" lat="-34.6365592" lon="-58.4853292"/>
+    <node id="-13" lat="-34.6365151" lon="-58.4853456"/>
+    <node id="-14" lat="-34.6364469" lon="-58.485371"/>
+    <node id="-15" lat="-34.6364085" lon="-58.4853853"/>
+    <node id="-16" lat="-34.6363984" lon="-58.4853452"/>
+    <node id="-17" lat="-34.6363904" lon="-58.485314"/>
+    <node id="-18" lat="-34.636429" lon="-58.4853003"/>
+    <node id="-19" lat="-34.6363928" lon="-58.485157"/>
+    <node id="-20" lat="-34.6364158" lon="-58.4851485"/>
+    <node id="-21" lat="-34.6364422" lon="-58.4851387"/>
+    <node id="-22" lat="-34.636461" lon="-58.4851317"/>
+    <node id="-25" lat="-34.6364431" lon="-58.4852564"/>
+    <node id="-26" lat="-34.6364883" lon="-58.4852397"/>
+    <node id="-30" lat="-34.6383165" lon="-58.4819399"/>
+    <node id="-31" lat="-34.6382659" lon="-58.4819579"/>
+    <node id="-32" lat="-34.638274" lon="-58.4819919"/>
+    <node id="-33" lat="-34.6382566" lon="-58.4820039"/>
+    <node id="-34" lat="-34.6382429" lon="-58.4820133"/>
+    <node id="-35" lat="-34.6382391" lon="-58.4819962"/>
+    <node id="-36" lat="-34.6382304" lon="-58.4819574"/>
+    <node id="-37" lat="-34.6382201" lon="-58.4819107"/>
+    <node id="-38" lat="-34.6383233" lon="-58.4818741"/>
+    <node id="-39" lat="-34.6383425" lon="-58.4818673"/>
+    <node id="-40" lat="-34.6383927" lon="-58.4818924"/>
+    <node id="-41" lat="-34.638399" lon="-58.4819062"/>
+    <node id="-42" lat="-34.6383526" lon="-58.481938"/>
+    <node id="-43" lat="-34.6383213" lon="-58.4819595"/>
+    <node id="-45" lat="-34.638263" lon="-58.4819458"/>
+    <node id="-48" lat="-34.638249" lon="-58.4820408"/>
+    <node id="-49" lat="-34.6382595" lon="-58.4820884"/>
+    <node id="-50" lat="-34.6382132" lon="-58.48212"/>
+    <node id="-51" lat="-34.6381929" lon="-58.4821339"/>
+    <node id="-52" lat="-34.6381802" lon="-58.4820836"/>
+    <node id="-53" lat="-34.6381603" lon="-58.4820048"/>
+    <node id="-54" lat="-34.6381857" lon="-58.4819957"/>
+    <node id="-55" lat="-34.6381775" lon="-58.4819618"/>
+    <node id="-56" lat="-34.6381518" lon="-58.4819709"/>
+    <node id="-57" lat="-34.6381435" lon="-58.4819379"/>
+    <node id="-58" lat="-34.6381695" lon="-58.4819287"/>
+    <node id="-60" lat="-34.6382339" lon="-58.4820461"/>
+    <node id="-61" lat="-34.6382233" lon="-58.4820017"/>
+    <node id="-63" lat="-34.6382022" lon="-58.4820756"/>
+    <node id="-66" lat="-34.6385059" lon="-58.4821393"/>
+    <node id="-67" lat="-34.6383984" lon="-58.482211"/>
+    <node id="-68" lat="-34.6383889" lon="-58.4822174"/>
+    <node id="-69" lat="-34.6383635" lon="-58.4822344"/>
+    <node id="-70" lat="-34.6383549" lon="-58.4822401"/>
+    <node id="-71" lat="-34.6383497" lon="-58.4822435"/>
+    <node id="-72" lat="-34.6383391" lon="-58.4822506"/>
+    <node id="-73" lat="-34.6382843" lon="-58.4822872"/>
+    <node id="-74" lat="-34.6382686" lon="-58.4822531"/>
+    <node id="-75" lat="-34.6382506" lon="-58.4822139"/>
+    <node id="-76" lat="-34.6382804" lon="-58.4821938"/>
+    <node id="-77" lat="-34.6382931" lon="-58.4822214"/>
+    <node id="-78" lat="-34.6383175" lon="-58.482205"/>
+    <node id="-79" lat="-34.6383108" lon="-58.4821905"/>
+    <node id="-80" lat="-34.6383003" lon="-58.4821976"/>
+    <node id="-81" lat="-34.6382942" lon="-58.4821845"/>
+    <node id="-82" lat="-34.6383159" lon="-58.48217"/>
+    <node id="-83" lat="-34.6383438" lon="-58.4821511"/>
+    <node id="-84" lat="-34.6383453" lon="-58.4821544"/>
+    <node id="-85" lat="-34.6383666" lon="-58.4821401"/>
+    <node id="-86" lat="-34.6383691" lon="-58.4821456"/>
+    <node id="-87" lat="-34.6383534" lon="-58.4821563"/>
+    <node id="-88" lat="-34.6383562" lon="-58.4821623"/>
+    <node id="-89" lat="-34.6384018" lon="-58.482133"/>
+    <node id="-90" lat="-34.6383907" lon="-58.4821091"/>
+    <node id="-91" lat="-34.6384681" lon="-58.482057"/>
+    <node id="-93" lat="-34.6384115" lon="-58.4821541"/>
+    <node id="-94" lat="-34.6383815" lon="-58.4821744"/>
+    <node id="-95" lat="-34.6383469" lon="-58.4821992"/>
+    <node id="-96" lat="-34.6383424" lon="-58.4821904"/>
+    <node id="-97" lat="-34.6383573" lon="-58.4821804"/>
+    <node id="-102" lat="-34.6381828" lon="-58.4822867"/>
+    <node id="-103" lat="-34.6381694" lon="-58.482258"/>
+    <node id="-104" lat="-34.6381918" lon="-58.482243"/>
+    <node id="-105" lat="-34.638216" lon="-58.4822266"/>
+    <node id="-106" lat="-34.6382284" lon="-58.482256"/>
+    <node id="-108" lat="-34.638223" lon="-58.4823281"/>
+    <node id="-109" lat="-34.6382071" lon="-58.4823388"/>
+    <node id="-110" lat="-34.6381968" lon="-58.4823168"/>
+    <node id="-111" lat="-34.6382127" lon="-58.4823061"/>
+    <node id="-113" lat="-34.6383572" lon="-58.4820233"/>
+    <node id="-114" lat="-34.6384303" lon="-58.4819745"/>
+    <node id="-115" lat="-34.6383132" lon="-58.4821613"/>
+    <node id="-116" lat="-34.6382469" lon="-58.4822059"/>
+    <node id="-117" lat="-34.6382305" lon="-58.4822169"/>
+    <node id="-118" lat="-34.6382236" lon="-58.4822022"/>
+    <node id="-119" lat="-34.6382399" lon="-58.482191"/>
+    <node id="-120" lat="-34.6382301" lon="-58.48217"/>
+    <node id="-121" lat="-34.6382459" lon="-58.4821591"/>
+    <node id="-122" lat="-34.638236" lon="-58.4821379"/>
+    <node id="-123" lat="-34.638256" lon="-58.4821242"/>
+    <node id="-124" lat="-34.6382861" lon="-58.4821035"/>
+    <node id="-125" lat="-34.638285" lon="-58.4821011"/>
+    <node id="-126" lat="-34.6383228" lon="-58.4820772"/>
+    <node id="-127" lat="-34.638368" lon="-58.4820462"/>
+    <node id="-129" lat="-34.6382961" lon="-58.4821248"/>
+    <node id="-130" lat="-34.6383332" lon="-58.4820994"/>
+    <node id="-132" lat="-34.6382671" lon="-58.4821479"/>
+    <node id="-133" lat="-34.6382471" lon="-58.4821616"/>
+    <node id="-137" lat="-34.6382818" lon="-58.4819866"/>
+    <node id="-138" lat="-34.6383128" lon="-58.4820529"/>
+    <node id="-139" lat="-34.6382611" lon="-58.4820133"/>
+    <node id="-140" lat="-34.6382534" lon="-58.4820186"/>
+    <node id="-141" lat="-34.6382571" lon="-58.4820353"/>
+    <node id="-142" lat="-34.6382807" lon="-58.4820194"/>
+    <node id="-143" lat="-34.6382747" lon="-58.4820068"/>
+    <node id="-144" lat="-34.6382872" lon="-58.4819982"/>
+    <node id="-149" lat="-34.6372041" lon="-58.4826982"/>
+    <node id="-150" lat="-34.6373082" lon="-58.4826584"/>
+    <node id="-151" lat="-34.6373199" lon="-58.4827032"/>
+    <node id="-152" lat="-34.6373159" lon="-58.4827047"/>
+    <node id="-153" lat="-34.637327" lon="-58.4827472"/>
+    <node id="-154" lat="-34.6372845" lon="-58.4827634"/>
+    <node id="-155" lat="-34.6373033" lon="-58.4828351"/>
+    <node id="-156" lat="-34.637234" lon="-58.4828616"/>
+    <node id="-157" lat="-34.6372168" lon="-58.4828682"/>
+    <node id="-158" lat="-34.6371847" lon="-58.482745"/>
+    <node id="-159" lat="-34.6372018" lon="-58.4827385"/>
+    <node id="-160" lat="-34.6372134" lon="-58.482734"/>
+    <node id="-163" lat="-34.6372711" lon="-58.482712"/>
+    <node id="-166" lat="-34.6360494" lon="-58.4850584"/>
+    <node id="-167" lat="-34.6361493" lon="-58.4850219"/>
+    <node id="-168" lat="-34.63616" lon="-58.485018"/>
+    <node id="-169" lat="-34.636212" lon="-58.484999"/>
+    <node id="-170" lat="-34.6362382" lon="-58.4849894"/>
+    <node id="-171" lat="-34.63629" lon="-58.4849705"/>
+    <node id="-172" lat="-34.6363159" lon="-58.484961"/>
+    <node id="-173" lat="-34.6363694" lon="-58.4849415"/>
+    <node id="-174" lat="-34.6363973" lon="-58.4849313"/>
+    <node id="-175" lat="-34.6364401" lon="-58.4849156"/>
+    <node id="-176" lat="-34.636447" lon="-58.4849131"/>
+    <node id="-177" lat="-34.6366099" lon="-58.4848536"/>
+    <node id="-178" lat="-34.6366241" lon="-58.4849144"/>
+    <node id="-179" lat="-34.6366336" lon="-58.4849554"/>
+    <node id="-180" lat="-34.6361442" lon="-58.4851376"/>
+    <node id="-181" lat="-34.6360739" lon="-58.4851637"/>
+  <node id="-182" lat="-34.6362216" lon="-58.4837472"/>
+    <node id="-183" lat="-34.6361656" lon="-58.4835063"/>
+    <node id="-184" lat="-34.6359066" lon="-58.4835943"/>
+    <node id="-185" lat="-34.6359206" lon="-58.4836545"/>
+    <node id="-186" lat="-34.6359835" lon="-58.4836331"/>
+    <node id="-187" lat="-34.6359847" lon="-58.4836386"/>
+    <node id="-188" lat="-34.636018" lon="-58.4836273"/>
+    <node id="-189" lat="-34.636048" lon="-58.4837566"/>
+    <node id="-190" lat="-34.6360148" lon="-58.483768"/>
+    <node id="-191" lat="-34.6360006" lon="-58.4837069"/>
+    <node id="-192" lat="-34.6359094" lon="-58.4837379"/>
+    <node id="-193" lat="-34.6359406" lon="-58.4838726"/>
+    <node id="-194" lat="-34.6361336" lon="-58.4838071"/>
+    <node id="-195" lat="-34.6361537" lon="-58.4838938"/>
+    <node id="-196" lat="-34.6359922" lon="-58.4839484"/>
+    <node id="-197" lat="-34.6359607" lon="-58.4839588"/>
+    <node id="-198" lat="-34.6359888" lon="-58.4840799"/>
+    <node id="-199" lat="-34.63602" lon="-58.4840693"/>
+    <node id="-200" lat="-34.6360194" lon="-58.4840667"/>
+    <node id="-201" lat="-34.6363979" lon="-58.4839381"/>
+    <node id="-202" lat="-34.6364192" lon="-58.4840299"/>
+    <node id="-203" lat="-34.6360407" lon="-58.4841585"/>
+    <node id="-204" lat="-34.6360266" lon="-58.4840977"/>
+    <node id="-205" lat="-34.6359954" lon="-58.4841084"/>
+    <node id="-206" lat="-34.6360131" lon="-58.4841848"/>
+    <node id="-207" lat="-34.6359" lon="-58.4842232"/>
+    <node id="-208" lat="-34.6358502" lon="-58.484009"/>
+    <node id="-209" lat="-34.6358248" lon="-58.4840176"/>
+    <node id="-210" lat="-34.6358009" lon="-58.4839146"/>
+    <node id="-211" lat="-34.6358263" lon="-58.483906"/>
+    <node id="-212" lat="-34.6357771" lon="-58.4836937"/>
+    <node id="-213" lat="-34.6357821" lon="-58.4836921"/>
+    <node id="-214" lat="-34.635855" lon="-58.4836673"/>
+    <node id="-215" lat="-34.6358431" lon="-58.4836159"/>
+    <node id="-216" lat="-34.635787" lon="-58.4836349"/>
+    <node id="-217" lat="-34.6357646" lon="-58.4835384"/>
+    <node id="-218" lat="-34.6357976" lon="-58.4835272"/>
+    <node id="-219" lat="-34.6357939" lon="-58.4835112"/>
+    <node id="-220" lat="-34.6357663" lon="-58.4835206"/>
+    <node id="-221" lat="-34.6357576" lon="-58.4834827"/>
+    <node id="-222" lat="-34.6358005" lon="-58.4834676"/>
+    <node id="-223" lat="-34.6358068" lon="-58.4834948"/>
+    <node id="-224" lat="-34.6358307" lon="-58.4834867"/>
+    <node id="-225" lat="-34.635837" lon="-58.4835138"/>
+    <node id="-226" lat="-34.6361432" lon="-58.4834098"/>
+    <node id="-227" lat="-34.6361298" lon="-58.4833518"/>
+    <node id="-228" lat="-34.6363101" lon="-58.4832884"/>
+    <node id="-229" lat="-34.6364024" lon="-58.4836858"/>
+    <node id="-230" lat="-34.6364194" lon="-58.4837593"/>
+    <node id="-231" lat="-34.6362386" lon="-58.4838207"/>
+    <node id="-233" lat="-34.6358131" lon="-58.4835219"/>
+    <node id="-235" lat="-34.6358325" lon="-58.4839092"/>
+    <node id="-237" lat="-34.6358902" lon="-58.4836553"/>
+    <node id="-238" lat="-34.6358922" lon="-58.4836641"/>
+    <node id="-247" lat="-34.6365319" lon="-58.4847515"/>
+    <node id="-248" lat="-34.6365367" lon="-58.4847708"/>
+    <node id="-249" lat="-34.6365194" lon="-58.4847769"/>
+    <node id="-250" lat="-34.636422" lon="-58.4848112"/>
+    <node id="-251" lat="-34.636415" lon="-58.4848136"/>
+    <node id="-252" lat="-34.6363904" lon="-58.4848223"/>
+    <node id="-253" lat="-34.6363537" lon="-58.4848352"/>
+    <node id="-254" lat="-34.6361343" lon="-58.4849125"/>
+    <node id="-255" lat="-34.6360245" lon="-58.4849511"/>
+    <node id="-256" lat="-34.6359448" lon="-58.484608"/>
+    <node id="-257" lat="-34.6360396" lon="-58.4845735"/>
+    <node id="-258" lat="-34.6360439" lon="-58.484572"/>
+    <node id="-259" lat="-34.6360988" lon="-58.4847924"/>
+    <node id="-260" lat="-34.6363286" lon="-58.4847085"/>
+    <node id="-261" lat="-34.6362747" lon="-58.4844879"/>
+    <node id="-262" lat="-34.6362798" lon="-58.4844861"/>
+    <node id="-263" lat="-34.6363411" lon="-58.4844638"/>
+    <node id="-264" lat="-34.6363576" lon="-58.4844578"/>
+    <node id="-265" lat="-34.6363935" lon="-58.4844447"/>
+    <node id="-266" lat="-34.6364411" lon="-58.4844274"/>
+    <node id="-267" lat="-34.6365051" lon="-58.4844041"/>
+    <node id="-268" lat="-34.6365193" lon="-58.484465"/>
+    <node id="-269" lat="-34.6364408" lon="-58.4844943"/>
+    <node id="-270" lat="-34.6364434" lon="-58.4845048"/>
+    <node id="-271" lat="-34.6363808" lon="-58.4845281"/>
+    <node id="-272" lat="-34.6364174" lon="-58.484675"/>
+    <node id="-273" lat="-34.6365565" lon="-58.4846243"/>
+    <node id="-274" lat="-34.6365579" lon="-58.4846306"/>
+    <node id="-275" lat="-34.6365645" lon="-58.4846587"/>
+    <node id="-276" lat="-34.636577" lon="-58.4847123"/>
+    <node id="-277" lat="-34.6365439" lon="-58.4847243"/>
+    <node id="-278" lat="-34.6365491" lon="-58.4847452"/>
+    <node id="-280" lat="-34.6360958" lon="-58.4847992"/>
+    <node id="-281" lat="-34.636336" lon="-58.4847116"/>
+    <node id="-282" lat="-34.6364138" lon="-58.4846832"/>
+    <node id="-283" lat="-34.6365094" lon="-58.4847369"/>
+    <way id="-24">
+      <nd ref="-15"/>
+      <nd ref="-16"/>
+      <nd ref="-17"/>
+      <nd ref="-18"/>
+      <nd ref="-14"/>
+      <nd ref="-15"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="5.6"/>
+    </way>
+    <way id="-27">
+      <nd ref="-14"/>
+      <nd ref="-18"/>
+      <nd ref="-19"/>
+      <nd ref="-20"/>
+      <nd ref="-25"/>
+      <nd ref="-26"/>
+      <nd ref="-13"/>
+      <nd ref="-14"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="8.4"/>
+    </way>
+    <way id="-28">
+      <nd ref="-26"/>
+      <nd ref="-25"/>
+      <nd ref="-20"/>
+      <nd ref="-21"/>
+      <nd ref="-22"/>
+      <nd ref="-26"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="11.2"/>
+    </way>
+    <way id="-29">
+      <nd ref="-13"/>
+      <nd ref="-26"/>
+      <nd ref="-22"/>
+      <nd ref="-1"/>
+      <nd ref="-2"/>
+      <nd ref="-3"/>
+      <nd ref="-4"/>
+      <nd ref="-5"/>
+      <nd ref="-6"/>
+      <nd ref="-7"/>
+      <nd ref="-8"/>
+      <nd ref="-9"/>
+      <nd ref="-10"/>
+      <nd ref="-11"/>
+      <nd ref="-12"/>
+      <nd ref="-13"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+  <way id="-46">
+      <nd ref="-43"/>
+      <nd ref="-30"/>
+      <nd ref="-31"/>
+      <nd ref="-45"/>
+      <nd ref="-36"/>
+      <nd ref="-37"/>
+      <nd ref="-38"/>
+      <nd ref="-39"/>
+      <nd ref="-40"/>
+      <nd ref="-41"/>
+      <nd ref="-42"/>
+      <nd ref="-43"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+    <way id="-47">
+      <nd ref="-36"/>
+      <nd ref="-45"/>
+      <nd ref="-31"/>
+      <nd ref="-32"/>
+      <nd ref="-33"/>
+      <nd ref="-34"/>
+      <nd ref="-35"/>
+      <nd ref="-36"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="5.6"/>
+    </way>
+    <way id="-62">
+      <nd ref="-35"/>
+      <nd ref="-34"/>
+      <nd ref="-48"/>
+      <nd ref="-60"/>
+      <nd ref="-61"/>
+      <nd ref="-35"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="5.6"/>
+    </way>
+    <way id="-64">
+      <nd ref="-56"/>
+      <nd ref="-57"/>
+      <nd ref="-58"/>
+      <nd ref="-37"/>
+      <nd ref="-36"/>
+      <nd ref="-35"/>
+      <nd ref="-61"/>
+      <nd ref="-60"/>
+      <nd ref="-48"/>
+      <nd ref="-49"/>
+      <nd ref="-50"/>
+      <nd ref="-63"/>
+      <nd ref="-52"/>
+      <nd ref="-53"/>
+      <nd ref="-54"/>
+      <nd ref="-55"/>
+      <nd ref="-56"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+    <way id="-65">
+      <nd ref="-51"/>
+      <nd ref="-52"/>
+      <nd ref="-63"/>
+      <nd ref="-50"/>
+      <nd ref="-51"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="5.6"/>
+    </way>
+    <way id="-98">
+      <nd ref="-89"/>
+      <nd ref="-93"/>
+      <nd ref="-94"/>
+      <nd ref="-67"/>
+      <nd ref="-68"/>
+      <nd ref="-69"/>
+      <nd ref="-95"/>
+      <nd ref="-96"/>
+      <nd ref="-97"/>
+      <nd ref="-84"/>
+      <nd ref="-85"/>
+      <nd ref="-86"/>
+      <nd ref="-87"/>
+      <nd ref="-88"/>
+      <nd ref="-89"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+    <way id="-99">
+      <nd ref="-90"/>
+      <nd ref="-91"/>
+      <nd ref="-66"/>
+      <nd ref="-67"/>
+      <nd ref="-94"/>
+      <nd ref="-93"/>
+      <nd ref="-89"/>
+      <nd ref="-90"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="5.6"/>
+    </way>
+    <way id="-100">
+      <nd ref="-75"/>
+      <nd ref="-76"/>
+      <nd ref="-77"/>
+      <nd ref="-78"/>
+      <nd ref="-79"/>
+      <nd ref="-80"/>
+      <nd ref="-81"/>
+      <nd ref="-82"/>
+      <nd ref="-71"/>
+      <nd ref="-72"/>
+      <nd ref="-73"/>
+      <nd ref="-74"/>
+      <nd ref="-75"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+    <way id="-101">
+      <nd ref="-84"/>
+      <nd ref="-97"/>
+      <nd ref="-96"/>
+      <nd ref="-95"/>
+      <nd ref="-69"/>
+      <nd ref="-70"/>
+      <nd ref="-71"/>
+      <nd ref="-82"/>
+      <nd ref="-83"/>
+      <nd ref="-84"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="5.6"/>
+    </way>
+    <way id="-107">
+      <nd ref="-102"/>
+      <nd ref="-103"/>
+      <nd ref="-104"/>
+      <nd ref="-105"/>
+      <nd ref="-106"/>
+      <nd ref="-102"/>
+      <tag k="building" v="yes"/>
+      <tag k="height" v="2.8"/>
+      <tag k="ref:cadastre" v="54-119B-015"/>
+    </way>
+    <way id="-112">
+      <nd ref="-108"/>
+      <nd ref="-109"/>
+      <nd ref="-110"/>
+      <nd ref="-111"/>
+      <nd ref="-108"/>
+      <tag k="building" v="yes"/>
+      <tag k="height" v="2.8"/>
+      <tag k="ref:cadastre" v="54-119B-015"/>
+    </way>
+    <way id="-131">
+      <nd ref="-115"/>
+      <nd ref="-129"/>
+      <nd ref="-130"/>
+      <nd ref="-126"/>
+      <nd ref="-127"/>
+      <nd ref="-113"/>
+      <nd ref="-114"/>
+      <nd ref="-91"/>
+      <nd ref="-90"/>
+      <nd ref="-115"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="5.6"/>
+    </way>
+    <way id="-134">
+      <nd ref="-123"/>
+      <nd ref="-132"/>
+      <nd ref="-133"/>
+      <nd ref="-121"/>
+      <nd ref="-122"/>
+      <nd ref="-123"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="5.6"/>
+    </way>
+    <way id="-135">
+      <nd ref="-116"/>
+      <nd ref="-119"/>
+      <nd ref="-118"/>
+      <nd ref="-117"/>
+      <nd ref="-116"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="5.6"/>
+    </way>
+    <way id="-136">
+      <nd ref="-116"/>
+      <nd ref="-119"/>
+      <nd ref="-120"/>
+      <nd ref="-121"/>
+      <nd ref="-133"/>
+      <nd ref="-132"/>
+      <nd ref="-123"/>
+      <nd ref="-124"/>
+      <nd ref="-125"/>
+      <nd ref="-126"/>
+      <nd ref="-130"/>
+      <nd ref="-129"/>
+      <nd ref="-115"/>
+      <nd ref="-116"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+    <way id="-146">
+      <nd ref="-48"/>
+      <nd ref="-34"/>
+      <nd ref="-33"/>
+      <nd ref="-139"/>
+      <nd ref="-140"/>
+      <nd ref="-141"/>
+      <nd ref="-48"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+    <way id="-147">
+      <nd ref="-49"/>
+      <nd ref="-48"/>
+      <nd ref="-141"/>
+      <nd ref="-142"/>
+      <nd ref="-143"/>
+      <nd ref="-144"/>
+      <nd ref="-138"/>
+      <nd ref="-49"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="5.6"/>
+    </way>
+    <way id="-148">
+      <nd ref="-138"/>
+      <nd ref="-144"/>
+      <nd ref="-137"/>
+      <nd ref="-43"/>
+      <nd ref="-42"/>
+      <nd ref="-41"/>
+      <nd ref="-114"/>
+      <nd ref="-113"/>
+      <nd ref="-138"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+  <way id="-162">
+      <nd ref="-156"/>
+      <nd ref="-157"/>
+      <nd ref="-158"/>
+      <nd ref="-159"/>
+      <nd ref="-156"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+    <way id="-164">
+      <nd ref="-160"/>
+      <nd ref="-149"/>
+      <nd ref="-150"/>
+      <nd ref="-151"/>
+      <nd ref="-152"/>
+      <nd ref="-153"/>
+      <nd ref="-154"/>
+      <nd ref="-163"/>
+      <nd ref="-160"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+    <way id="-165">
+      <nd ref="-159"/>
+      <nd ref="-160"/>
+      <nd ref="-163"/>
+      <nd ref="-154"/>
+      <nd ref="-155"/>
+      <nd ref="-156"/>
+      <nd ref="-159"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="5.6"/>
+    </way>
+  <way id="-234">
+      <nd ref="-218"/>
+      <nd ref="-233"/>
+      <nd ref="-223"/>
+      <nd ref="-224"/>
+      <nd ref="-225"/>
+      <nd ref="-226"/>
+      <nd ref="-183"/>
+      <nd ref="-184"/>
+      <nd ref="-215"/>
+      <nd ref="-216"/>
+      <nd ref="-217"/>
+      <nd ref="-218"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="5.6"/>
+    </way>
+    <way id="-236">
+      <nd ref="-200"/>
+      <nd ref="-201"/>
+      <nd ref="-202"/>
+      <nd ref="-203"/>
+      <nd ref="-204"/>
+      <nd ref="-205"/>
+      <nd ref="-206"/>
+      <nd ref="-207"/>
+      <nd ref="-208"/>
+      <nd ref="-211"/>
+      <nd ref="-212"/>
+      <nd ref="-213"/>
+      <nd ref="-235"/>
+      <nd ref="-193"/>
+      <nd ref="-197"/>
+      <nd ref="-198"/>
+      <nd ref="-199"/>
+      <nd ref="-200"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="8.4"/>
+    </way>
+    <way id="-239">
+      <nd ref="-214"/>
+      <nd ref="-237"/>
+      <nd ref="-238"/>
+      <nd ref="-185"/>
+      <nd ref="-186"/>
+      <nd ref="-187"/>
+      <nd ref="-191"/>
+      <nd ref="-192"/>
+      <nd ref="-193"/>
+      <nd ref="-235"/>
+      <nd ref="-213"/>
+      <nd ref="-214"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="5.6"/>
+    </way>
+    <way id="-240">
+      <nd ref="-208"/>
+      <nd ref="-211"/>
+      <nd ref="-210"/>
+      <nd ref="-209"/>
+      <nd ref="-208"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="5.6"/>
+    </way>
+    <way id="-241">
+      <nd ref="-197"/>
+      <nd ref="-193"/>
+      <nd ref="-194"/>
+      <nd ref="-195"/>
+      <nd ref="-196"/>
+      <nd ref="-197"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+    <way id="-242">
+      <nd ref="-191"/>
+      <nd ref="-187"/>
+      <nd ref="-188"/>
+      <nd ref="-189"/>
+      <nd ref="-190"/>
+      <nd ref="-191"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+    <way id="-243">
+      <nd ref="-215"/>
+      <nd ref="-184"/>
+      <nd ref="-185"/>
+      <nd ref="-238"/>
+      <nd ref="-237"/>
+      <nd ref="-214"/>
+      <nd ref="-215"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+    <way id="-244">
+      <nd ref="-229"/>
+      <nd ref="-182"/>
+      <nd ref="-183"/>
+      <nd ref="-226"/>
+      <nd ref="-227"/>
+      <nd ref="-228"/>
+      <nd ref="-229"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+    <way id="-245">
+      <nd ref="-223"/>
+      <nd ref="-233"/>
+      <nd ref="-218"/>
+      <nd ref="-219"/>
+      <nd ref="-220"/>
+      <nd ref="-221"/>
+      <nd ref="-222"/>
+      <nd ref="-223"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+    <way id="-246">
+      <nd ref="-229"/>
+      <nd ref="-182"/>
+      <nd ref="-231"/>
+      <nd ref="-230"/>
+      <nd ref="-229"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="5.6"/>
+    </way>
+  <way id="-284">
+      <nd ref="-256"/>
+      <nd ref="-257"/>
+      <nd ref="-280"/>
+      <nd ref="-281"/>
+      <nd ref="-262"/>
+      <nd ref="-263"/>
+      <nd ref="-264"/>
+      <nd ref="-282"/>
+      <nd ref="-274"/>
+      <nd ref="-275"/>
+      <nd ref="-276"/>
+      <nd ref="-277"/>
+      <nd ref="-283"/>
+      <nd ref="-249"/>
+      <nd ref="-250"/>
+      <nd ref="-251"/>
+      <nd ref="-252"/>
+      <nd ref="-253"/>
+      <nd ref="-254"/>
+      <nd ref="-255"/>
+      <nd ref="-256"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="5.6"/>
+    </way>
+    <way id="-285">
+      <nd ref="-257"/>
+      <nd ref="-258"/>
+      <nd ref="-259"/>
+      <nd ref="-260"/>
+      <nd ref="-261"/>
+      <nd ref="-262"/>
+      <nd ref="-281"/>
+      <nd ref="-280"/>
+      <nd ref="-257"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+    <way id="-286">
+      <nd ref="-277"/>
+      <nd ref="-278"/>
+      <nd ref="-247"/>
+      <nd ref="-248"/>
+      <nd ref="-249"/>
+      <nd ref="-283"/>
+      <nd ref="-277"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+    <way id="-287">
+      <nd ref="-264"/>
+      <nd ref="-265"/>
+      <nd ref="-266"/>
+      <nd ref="-267"/>
+      <nd ref="-268"/>
+      <nd ref="-269"/>
+      <nd ref="-270"/>
+      <nd ref="-271"/>
+      <nd ref="-272"/>
+      <nd ref="-273"/>
+      <nd ref="-274"/>
+      <nd ref="-282"/>
+      <nd ref="-264"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+  </create>
+  <modify><way id="1172334163" version="3">
+      <nd ref="-1"/>
+      <nd ref="-2"/>
+      <nd ref="-3"/>
+      <nd ref="-4"/>
+      <nd ref="-5"/>
+      <nd ref="-6"/>
+      <nd ref="-7"/>
+      <nd ref="-8"/>
+      <nd ref="-9"/>
+      <nd ref="-10"/>
+      <nd ref="-11"/>
+      <nd ref="-12"/>
+      <nd ref="-13"/>
+      <nd ref="-14"/>
+      <nd ref="-15"/>
+      <nd ref="-16"/>
+      <nd ref="-17"/>
+      <nd ref="-18"/>
+      <nd ref="-19"/>
+      <nd ref="-20"/>
+      <nd ref="-21"/>
+      <nd ref="-22"/>
+      <nd ref="-1"/>
+      <tag k="addr:city" v="Ciudad Autónoma de Buenos Aires"/>
+      <tag k="addr:housenumber" v="4158"/>
+      <tag k="addr:postcode" v="C1407GSR"/>
+      <tag k="addr:street" v="Coronel Ramón Lorenzo Falcón"/>
+      <tag k="amenity" v="community_centre"/>
+      <tag k="building" v="yes"/>
+      <tag k="building:levels" v="3"/>
+      <tag k="community_centre" v="cultural_centre"/>
+      <tag k="height" v="11.2"/>
+      <tag k="name" v="Centro Esloveno - Slovenska Hiša"/>
+      <tag k="phone" v="+54 11 4636 0841"/>
+      <tag k="ref:cadastre" v="54-094-005"/>
+    </way>
+  <way id="1327866443" version="1">
+      <nd ref="-30"/>
+      <nd ref="-31"/>
+      <nd ref="-32"/>
+      <nd ref="-33"/>
+      <nd ref="-34"/>
+      <nd ref="-35"/>
+      <nd ref="-36"/>
+      <nd ref="-37"/>
+      <nd ref="-38"/>
+      <nd ref="-39"/>
+      <nd ref="-40"/>
+      <nd ref="-41"/>
+      <nd ref="-42"/>
+      <nd ref="-43"/>
+      <nd ref="-30"/>
+      <tag k="building" v="yes"/>
+      <tag k="height" v="5.6"/>
+      <tag k="ref:cadastre" v="54-119B-017B"/>
+      <tag k="shop" v="greengrocer"/>
+    </way>
+    <way id="1327866442" version="1">
+      <nd ref="-34"/>
+      <nd ref="-48"/>
+      <nd ref="-49"/>
+      <nd ref="-50"/>
+      <nd ref="-51"/>
+      <nd ref="-52"/>
+      <nd ref="-53"/>
+      <nd ref="-54"/>
+      <nd ref="-55"/>
+      <nd ref="-56"/>
+      <nd ref="-57"/>
+      <nd ref="-58"/>
+      <nd ref="-37"/>
+      <nd ref="-36"/>
+      <nd ref="-35"/>
+      <nd ref="-34"/>
+      <tag k="building" v="house"/>
+      <tag k="height" v="5.6"/>
+      <tag k="ref:cadastre" v="54-119B-018"/>
+    </way>
+    <way id="1327866435" version="2">
+      <nd ref="-66"/>
+      <nd ref="-67"/>
+      <nd ref="-68"/>
+      <nd ref="-69"/>
+      <nd ref="-70"/>
+      <nd ref="-71"/>
+      <nd ref="-72"/>
+      <nd ref="-73"/>
+      <nd ref="-74"/>
+      <nd ref="-75"/>
+      <nd ref="-76"/>
+      <nd ref="-77"/>
+      <nd ref="-78"/>
+      <nd ref="-79"/>
+      <nd ref="-80"/>
+      <nd ref="-81"/>
+      <nd ref="-82"/>
+      <nd ref="-83"/>
+      <nd ref="-84"/>
+      <nd ref="-85"/>
+      <nd ref="-86"/>
+      <nd ref="-87"/>
+      <nd ref="-88"/>
+      <nd ref="-89"/>
+      <nd ref="-90"/>
+      <nd ref="-91"/>
+      <nd ref="-66"/>
+      <tag k="building" v="yes"/>
+      <tag k="height" v="5.6"/>
+      <tag k="ref:cadastre" v="54-119B-015"/>
+    </way>
+    <way id="477536511" version="4">
+      <nd ref="-113"/>
+      <nd ref="-114"/>
+      <nd ref="-91"/>
+      <nd ref="-90"/>
+      <nd ref="-115"/>
+      <nd ref="-116"/>
+      <nd ref="-117"/>
+      <nd ref="-118"/>
+      <nd ref="-119"/>
+      <nd ref="-120"/>
+      <nd ref="-121"/>
+      <nd ref="-122"/>
+      <nd ref="-123"/>
+      <nd ref="-124"/>
+      <nd ref="-125"/>
+      <nd ref="-126"/>
+      <nd ref="-127"/>
+      <nd ref="-113"/>
+      <tag k="addr:city" v="Ciudad Autónoma de Buenos Aires"/>
+      <tag k="addr:country" v="AR"/>
+      <tag k="addr:street" v="Avenida Juan Bautista Alberdi"/>
+      <tag k="building" v="yes"/>
+      <tag k="height" v="5.6"/>
+      <tag k="name" v="Marmoleria Ruta 4"/>
+      <tag k="ref:cadastre" v="54-119B-016"/>
+      <tag k="shop" v="yes"/>
+    </way>
+    <way id="477536508" version="5">
+      <nd ref="-137"/>
+      <nd ref="-43"/>
+      <nd ref="-42"/>
+      <nd ref="-41"/>
+      <nd ref="-114"/>
+      <nd ref="-113"/>
+      <nd ref="-138"/>
+      <nd ref="-49"/>
+      <nd ref="-48"/>
+      <nd ref="-34"/>
+      <nd ref="-33"/>
+      <nd ref="-139"/>
+      <nd ref="-140"/>
+      <nd ref="-141"/>
+      <nd ref="-142"/>
+      <nd ref="-143"/>
+      <nd ref="-144"/>
+      <nd ref="-137"/>
+      <tag k="addr:city" v="Ciudad Autónoma de Buenos Aires"/>
+      <tag k="addr:country" v="AR"/>
+      <tag k="addr:street" v="Avenida Juan Bautista Alberdi"/>
+      <tag k="building" v="yes"/>
+      <tag k="height" v="5.6"/>
+      <tag k="name" v="Tecno Aiberal"/>
+      <tag k="ref:cadastre" v="54-119B-017A"/>
+      <tag k="shop" v="yes"/>
+    </way>
+  <way id="629831611" version="1">
+      <nd ref="-149"/>
+      <nd ref="-150"/>
+      <nd ref="-151"/>
+      <nd ref="-152"/>
+      <nd ref="-153"/>
+      <nd ref="-154"/>
+      <nd ref="-155"/>
+      <nd ref="-156"/>
+      <nd ref="-157"/>
+      <nd ref="-158"/>
+      <nd ref="-159"/>
+      <nd ref="-160"/>
+      <nd ref="-149"/>
+      <tag k="building" v="yes"/>
+      <tag k="height" v="5.6"/>
+      <tag k="ref:cadastre" v="54-119A-001E"/>
+    </way>
+  <way id="728189871" version="3">
+      <nd ref="-166"/>
+      <nd ref="-167"/>
+      <nd ref="-168"/>
+      <nd ref="-169"/>
+      <nd ref="-170"/>
+      <nd ref="-171"/>
+      <nd ref="-172"/>
+      <nd ref="-173"/>
+      <nd ref="-174"/>
+      <nd ref="-175"/>
+      <nd ref="-176"/>
+      <nd ref="-177"/>
+      <nd ref="-178"/>
+      <nd ref="-179"/>
+      <nd ref="-180"/>
+      <nd ref="-181"/>
+      <nd ref="-166"/>
+      <tag k="addr:city" v="Ciudad Autónoma de Buenos Aires"/>
+      <tag k="addr:country" v="AR"/>
+      <tag k="addr:housenumber" v="4140"/>
+      <tag k="addr:postcode" v="1407"/>
+      <tag k="addr:street" v="Coronel Ramón Lorenzo Falcón"/>
+      <tag k="building" v="yes"/>
+      <tag k="height" v="2.8"/>
+      <tag k="ref:cadastre" v="54-094-004B"/>
+      <tag k="shop" v="car_repair"/>
+    </way>
+  <way id="924376383" version="1">
+      <nd ref="-182"/>
+      <nd ref="-183"/>
+      <nd ref="-184"/>
+      <nd ref="-185"/>
+      <nd ref="-186"/>
+      <nd ref="-187"/>
+      <nd ref="-188"/>
+      <nd ref="-189"/>
+      <nd ref="-190"/>
+      <nd ref="-191"/>
+      <nd ref="-192"/>
+      <nd ref="-193"/>
+      <nd ref="-194"/>
+      <nd ref="-195"/>
+      <nd ref="-196"/>
+      <nd ref="-197"/>
+      <nd ref="-198"/>
+      <nd ref="-199"/>
+      <nd ref="-200"/>
+      <nd ref="-201"/>
+      <nd ref="-202"/>
+      <nd ref="-203"/>
+      <nd ref="-204"/>
+      <nd ref="-205"/>
+      <nd ref="-206"/>
+      <nd ref="-207"/>
+      <nd ref="-208"/>
+      <nd ref="-209"/>
+      <nd ref="-210"/>
+      <nd ref="-211"/>
+      <nd ref="-212"/>
+      <nd ref="-213"/>
+      <nd ref="-214"/>
+      <nd ref="-215"/>
+      <nd ref="-216"/>
+      <nd ref="-217"/>
+      <nd ref="-218"/>
+      <nd ref="-219"/>
+      <nd ref="-220"/>
+      <nd ref="-221"/>
+      <nd ref="-222"/>
+      <nd ref="-223"/>
+      <nd ref="-224"/>
+      <nd ref="-225"/>
+      <nd ref="-226"/>
+      <nd ref="-227"/>
+      <nd ref="-228"/>
+      <nd ref="-229"/>
+      <nd ref="-230"/>
+      <nd ref="-231"/>
+      <nd ref="-182"/>
+      <tag k="building" v="college"/>
+      <tag k="height" v="8.4"/>
+      <tag k="ref:cadastre" v="54-120-005A"/>
+    </way>
+  <way id="924899145" version="1">
+      <nd ref="-247"/>
+      <nd ref="-248"/>
+      <nd ref="-249"/>
+      <nd ref="-250"/>
+      <nd ref="-251"/>
+      <nd ref="-252"/>
+      <nd ref="-253"/>
+      <nd ref="-254"/>
+      <nd ref="-255"/>
+      <nd ref="-256"/>
+      <nd ref="-257"/>
+      <nd ref="-258"/>
+      <nd ref="-259"/>
+      <nd ref="-260"/>
+      <nd ref="-261"/>
+      <nd ref="-262"/>
+      <nd ref="-263"/>
+      <nd ref="-264"/>
+      <nd ref="-265"/>
+      <nd ref="-266"/>
+      <nd ref="-267"/>
+      <nd ref="-268"/>
+      <nd ref="-269"/>
+      <nd ref="-270"/>
+      <nd ref="-271"/>
+      <nd ref="-272"/>
+      <nd ref="-273"/>
+      <nd ref="-274"/>
+      <nd ref="-275"/>
+      <nd ref="-276"/>
+      <nd ref="-277"/>
+      <nd ref="-278"/>
+      <nd ref="-247"/>
+      <tag k="building" v="school"/>
+      <tag k="height" v="5.6"/>
+      <tag k="ref:cadastre" v="54-094-002B"/>
+    </way>
+  </modify>
+  <delete><way id="924376382" version="1"/>
+    <node id="4708681503" version="3" lat="-34.6382316" lon="-58.4820947"/>
+    <node id="4708681504" version="2" lat="-34.6384084" lon="-58.4819790"/>
+    <node id="4708681505" version="2" lat="-34.6383778" lon="-58.4819132"/>
+    <node id="4708681506" version="3" lat="-34.6382169" lon="-58.4820203"/>
+    <node id="4708681509" version="2" lat="-34.6384494" lon="-58.4820595"/>
+    <node id="12285413664" version="1" lat="-34.6383571" lon="-58.4818834"/>
+    <node id="12285413665" version="1" lat="-34.6383677" lon="-58.4818939"/>
+    <node id="13033255438" version="1" lat="-34.6384924" lon="-58.4821464"/>
+  <node id="5948231735" version="1" lat="-34.6372073" lon="-58.4828704"/>
+    <node id="5948231736" version="1" lat="-34.6372948" lon="-58.4828389"/>
+    <node id="5948231737" version="1" lat="-34.6372767" lon="-58.4827649"/>
+    <node id="5948231738" version="1" lat="-34.6373181" lon="-58.4827500"/>
+    <node id="5948231739" version="1" lat="-34.6372972" lon="-58.4826642"/>
+    <node id="5948231740" version="1" lat="-34.6371909" lon="-58.4827025"/>
+    <node id="5948231741" version="1" lat="-34.6372005" lon="-58.4827420"/>
+    <node id="5948231742" version="1" lat="-34.6371779" lon="-58.4827502"/>
+  <node id="6823792949" version="2" lat="-34.6360603" lon="-58.4851656"/>
+    <node id="6823792950" version="2" lat="-34.6360359" lon="-58.4850657"/>
+    <node id="6823792951" version="2" lat="-34.6366358" lon="-58.4848495"/>
+    <node id="6823792952" version="2" lat="-34.6366602" lon="-58.4849496"/>
+  <node id="8579186805" version="1" lat="-34.6364052" lon="-58.4837624"/>
+    <node id="8579186806" version="1" lat="-34.6363257" lon="-58.4834265"/>
+    <node id="8579186810" version="1" lat="-34.6362236" lon="-58.4838255"/>
+    <node id="8579186811" version="1" lat="-34.6358317" lon="-58.4840138"/>
+    <node id="8579186812" version="1" lat="-34.6358822" lon="-58.4842322"/>
+    <node id="8579186813" version="1" lat="-34.6360004" lon="-58.4841918"/>
+    <node id="8579186814" version="1" lat="-34.6359818" lon="-58.4841116"/>
+    <node id="8579186815" version="1" lat="-34.6360075" lon="-58.4841028"/>
+    <node id="8579186816" version="1" lat="-34.6360229" lon="-58.4841694"/>
+    <node id="8579235217" version="1" lat="-34.6364073" lon="-58.4840381"/>
+    <node id="8579235218" version="1" lat="-34.6363837" lon="-58.4839362"/>
+    <node id="8579235219" version="1" lat="-34.6360008" lon="-58.4840670"/>
+    <node id="8579235220" version="1" lat="-34.6360018" lon="-58.4840713"/>
+    <node id="8579235221" version="1" lat="-34.6359762" lon="-58.4840800"/>
+    <node id="8579235222" version="1" lat="-34.6359435" lon="-58.4839386"/>
+    <node id="8579235223" version="1" lat="-34.6359682" lon="-58.4839302"/>
+    <node id="8579235224" version="1" lat="-34.6359752" lon="-58.4839605"/>
+    <node id="8579235225" version="1" lat="-34.6361401" lon="-58.4839041"/>
+    <node id="8579235226" version="1" lat="-34.6361189" lon="-58.4838127"/>
+    <node id="8579235227" version="1" lat="-34.6359287" lon="-58.4838777"/>
+    <node id="8579235228" version="1" lat="-34.6358988" lon="-58.4837485"/>
+    <node id="8579235229" version="1" lat="-34.6359796" lon="-58.4837209"/>
+    <node id="8579235230" version="1" lat="-34.6359921" lon="-58.4837750"/>
+    <node id="8579235231" version="1" lat="-34.6360333" lon="-58.4837609"/>
+    <node id="8579235232" version="1" lat="-34.6360013" lon="-58.4836223"/>
+    <node id="8579235233" version="1" lat="-34.6358787" lon="-58.4836642"/>
+    <node id="8579235234" version="1" lat="-34.6358760" lon="-58.4836524"/>
+    <node id="8579235235" version="1" lat="-34.6358670" lon="-58.4836555"/>
+    <node id="8579235236" version="1" lat="-34.6358579" lon="-58.4836160"/>
+    <node id="8579235237" version="1" lat="-34.6361501" lon="-58.4835162"/>
+    <node id="8579235238" version="1" lat="-34.6361257" lon="-58.4834107"/>
+    <node id="8579235239" version="1" lat="-34.6358217" lon="-58.4835145"/>
+    <node id="8579235240" version="1" lat="-34.6358162" lon="-58.4834905"/>
+    <node id="8579235241" version="1" lat="-34.6357914" lon="-58.4834990"/>
+    <node id="8579235244" version="1" lat="-34.6357516" lon="-58.4835383"/>
+    <node id="8579235245" version="1" lat="-34.6357439" lon="-58.4835410"/>
+    <node id="8579235246" version="1" lat="-34.6357682" lon="-58.4836461"/>
+    <node id="8579235247" version="1" lat="-34.6358271" lon="-58.4836260"/>
+    <node id="8579235248" version="1" lat="-34.6358365" lon="-58.4836665"/>
+    <node id="8579235249" version="1" lat="-34.6357578" lon="-58.4836934"/>
+    <node id="8579235250" version="1" lat="-34.6358079" lon="-58.4839100"/>
+    <node id="8579235251" version="1" lat="-34.6357848" lon="-58.4839179"/>
+    <node id="8579235252" version="1" lat="-34.6358087" lon="-58.4840216"/>
+  <node id="8583875558" version="1" lat="-34.6364918" lon="-58.4847401"/>
+    <node id="8583875560" version="1" lat="-34.6363985" lon="-58.4846885"/>
+    <node id="8583875561" version="1" lat="-34.6363599" lon="-58.4845289"/>
+    <node id="8583875565" version="1" lat="-34.6363202" lon="-58.4847123"/>
+    <node id="8583875566" version="1" lat="-34.6360810" lon="-58.4847988"/>
+  </delete>
+</osmChange>

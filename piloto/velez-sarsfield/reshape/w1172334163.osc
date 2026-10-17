@@ -1,0 +1,121 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<osmChange version="0.6" generator="osm-bsas-building-import">
+  <create>
+    <node id="-1" lat="-34.6364802" lon="-58.4851246"/>
+    <node id="-2" lat="-34.6364877" lon="-58.4851218"/>
+    <node id="-3" lat="-34.6365183" lon="-58.4851104"/>
+    <node id="-4" lat="-34.6366579" lon="-58.4850597"/>
+    <node id="-5" lat="-34.6366662" lon="-58.485095"/>
+    <node id="-6" lat="-34.6366911" lon="-58.4852022"/>
+    <node id="-7" lat="-34.6367061" lon="-58.4852664"/>
+    <node id="-8" lat="-34.6367075" lon="-58.4852726"/>
+    <node id="-9" lat="-34.6366727" lon="-58.4852859"/>
+    <node id="-10" lat="-34.6366326" lon="-58.4853012"/>
+    <node id="-11" lat="-34.6365993" lon="-58.4853139"/>
+    <node id="-12" lat="-34.6365592" lon="-58.4853292"/>
+    <node id="-13" lat="-34.6365151" lon="-58.4853456"/>
+    <node id="-14" lat="-34.6364469" lon="-58.485371"/>
+    <node id="-15" lat="-34.6364085" lon="-58.4853853"/>
+    <node id="-16" lat="-34.6363984" lon="-58.4853452"/>
+    <node id="-17" lat="-34.6363904" lon="-58.485314"/>
+    <node id="-18" lat="-34.636429" lon="-58.4853003"/>
+    <node id="-19" lat="-34.6363928" lon="-58.485157"/>
+    <node id="-20" lat="-34.6364158" lon="-58.4851485"/>
+    <node id="-21" lat="-34.6364422" lon="-58.4851387"/>
+    <node id="-22" lat="-34.636461" lon="-58.4851317"/>
+    <node id="-25" lat="-34.6364431" lon="-58.4852564"/>
+    <node id="-26" lat="-34.6364883" lon="-58.4852397"/>
+    <way id="-24">
+      <nd ref="-15"/>
+      <nd ref="-16"/>
+      <nd ref="-17"/>
+      <nd ref="-18"/>
+      <nd ref="-14"/>
+      <nd ref="-15"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="5.6"/>
+    </way>
+    <way id="-27">
+      <nd ref="-14"/>
+      <nd ref="-18"/>
+      <nd ref="-19"/>
+      <nd ref="-20"/>
+      <nd ref="-25"/>
+      <nd ref="-26"/>
+      <nd ref="-13"/>
+      <nd ref="-14"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="8.4"/>
+    </way>
+    <way id="-28">
+      <nd ref="-26"/>
+      <nd ref="-25"/>
+      <nd ref="-20"/>
+      <nd ref="-21"/>
+      <nd ref="-22"/>
+      <nd ref="-26"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="11.2"/>
+    </way>
+    <way id="-29">
+      <nd ref="-13"/>
+      <nd ref="-26"/>
+      <nd ref="-22"/>
+      <nd ref="-1"/>
+      <nd ref="-2"/>
+      <nd ref="-3"/>
+      <nd ref="-4"/>
+      <nd ref="-5"/>
+      <nd ref="-6"/>
+      <nd ref="-7"/>
+      <nd ref="-8"/>
+      <nd ref="-9"/>
+      <nd ref="-10"/>
+      <nd ref="-11"/>
+      <nd ref="-12"/>
+      <nd ref="-13"/>
+      <tag k="building:part" v="yes"/>
+      <tag k="height" v="2.8"/>
+    </way>
+  </create>
+  <modify>
+    <way id="1172334163" version="3">
+      <nd ref="-1"/>
+      <nd ref="-2"/>
+      <nd ref="-3"/>
+      <nd ref="-4"/>
+      <nd ref="-5"/>
+      <nd ref="-6"/>
+      <nd ref="-7"/>
+      <nd ref="-8"/>
+      <nd ref="-9"/>
+      <nd ref="-10"/>
+      <nd ref="-11"/>
+      <nd ref="-12"/>
+      <nd ref="-13"/>
+      <nd ref="-14"/>
+      <nd ref="-15"/>
+      <nd ref="-16"/>
+      <nd ref="-17"/>
+      <nd ref="-18"/>
+      <nd ref="-19"/>
+      <nd ref="-20"/>
+      <nd ref="-21"/>
+      <nd ref="-22"/>
+      <nd ref="-1"/>
+      <tag k="addr:city" v="Ciudad Autónoma de Buenos Aires"/>
+      <tag k="addr:housenumber" v="4158"/>
+      <tag k="addr:postcode" v="C1407GSR"/>
+      <tag k="addr:street" v="Coronel Ramón Lorenzo Falcón"/>
+      <tag k="amenity" v="community_centre"/>
+      <tag k="building" v="yes"/>
+      <tag k="building:levels" v="3"/>
+      <tag k="community_centre" v="cultural_centre"/>
+      <tag k="height" v="11.2"/>
+      <tag k="name" v="Centro Esloveno - Slovenska Hiša"/>
+      <tag k="phone" v="+54 11 4636 0841"/>
+      <tag k="ref:cadastre" v="54-094-005"/>
+    </way>
+  </modify>
+  <delete/>
+</osmChange>
