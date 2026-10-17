@@ -1060,8 +1060,11 @@ resolve. Informal discussion can continue in the existing forum thread
       structures, MapRoulette Reshape tasks of neighbouring groups, the
       import account, a timeline, and the counts of `run_20260927`. The
       revert procedure is described too (6.8).
-- [ ] **6.7 Register the dedicated `(username)_Import` account.** Required by the
+- [x] **6.7 Register the dedicated import account.** Required by the
       Guidelines. Independent of everything else — can be done at any point.
+      Done: OSM wiki account `Proyecto_Edificacion_CABA`
+      (https://wiki.openstreetmap.org/wiki/User:Proyecto_Edificacion_CABA);
+      `import.wikitext` names it.
 - [x] **6.8 Write the revert procedure.** The Guidelines require knowing how to
       revert before the first upload.
       Decision (2026-09-27): every import changeset carries the hashtag
