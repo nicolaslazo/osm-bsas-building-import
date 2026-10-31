@@ -97,8 +97,9 @@ building's geometry (or the one with the largest overlap) and the group's other 
 are deleted. In an N:1 group the structure with the largest overlap keeps the Live building's
 way and tags; an N:1 group whose Live building has tags and whose structures lie on several
 parcels goes to Conflicts. A group whose structures overlap an OSM building that stays goes to
-Conflicts instead. No overlap or distance cutoff applies: the
-footprints are taken as more accurate than the OSM shape. The pipeline
+Conflicts instead, as does a group where the union of its structures and the union of its Live
+buildings overlap in half of the larger union or less. No other overlap or distance cutoff
+applies: the footprints are taken as more accurate than the OSM shape. The pipeline
 decides this before publication; the JOSM conflation plugin only helps review it.
 _Avoid_: update, replace, conflate, merge
 

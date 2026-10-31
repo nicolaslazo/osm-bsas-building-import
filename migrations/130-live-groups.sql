@@ -3,7 +3,8 @@
 -- decidable at this point, its Conflicts reasons. with_parts flags structures a Live
 -- building:part mostly lies inside (Live has parts, 4.4). member records each node's group
 -- for later migrations. late_live and works_structures (127) add the data-date reasons
--- (4.9, 4.10).
+-- (4.9, 4.10). group_overlap is the overlap of the union of the group's structures with the
+-- union of its Live buildings, over the larger union (4.11).
 
 -- Live has parts: a Live building:part lies mostly inside the structure
 DROP TABLE IF EXISTS with_parts;
@@ -41,6 +42,22 @@ LEFT JOIN late_live ll ON ll.lid = -n.id
 LEFT JOIN works_structures ws ON ws.sid = n.id
 GROUP BY n.comp;
 ALTER TABLE live_groups ADD PRIMARY KEY (grp);
+
+-- Reciprocal overlap per group (4.11)
+ALTER TABLE live_groups ADD COLUMN group_overlap DOUBLE PRECISION;
+WITH u AS (
+    SELECT n.comp AS grp,
+           ST_Union(s.geom) FILTER (WHERE n.id > 0) AS st_geom,
+           ST_Union(l.geom) FILTER (WHERE n.id < 0) AS live_geom
+    FROM cc_nodes n
+    LEFT JOIN structure_shapes s ON s.sid = n.id
+    LEFT JOIN live_shapes l ON l.lid = -n.id
+    GROUP BY n.comp)
+UPDATE live_groups g
+SET group_overlap = ST_Area(ST_Intersection(u.st_geom, u.live_geom))
+                    / GREATEST(ST_Area(u.st_geom), ST_Area(u.live_geom))
+FROM u WHERE u.grp = g.grp;
+
 ALTER TABLE live_groups ADD COLUMN kind TEXT, ADD COLUMN reasons TEXT[], ADD COLUMN held BOOLEAN NOT NULL DEFAULT false;
 UPDATE live_groups SET kind = CASE
     WHEN n_st = 1 AND n_live = 1 THEN '1:1'
@@ -56,7 +73,8 @@ UPDATE live_groups SET reasons = NULLIF(array_remove(ARRAY[
     CASE WHEN kind = '1:N' AND n_tagged >= 2 THEN '1:N with two or more tagged OSM buildings' END,
     CASE WHEN kind = 'N:1' AND n_tagged = 1 AND n_parcels > 1 THEN 'N:1 tagged OSM building over several parcels' END,
     CASE WHEN has_late_live THEN 'OSM building mapped after the data date' END,
-    CASE WHEN has_works THEN 'building work since the data date' END
+    CASE WHEN has_works THEN 'building work since the data date' END,
+    CASE WHEN group_overlap <= 0.5 THEN 'group overlap under half of a side' END
     ], NULL), '{}');
 
 DROP TABLE IF EXISTS member;
