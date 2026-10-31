@@ -1,8 +1,9 @@
 #!/bin/bash
 # Usage: bin/import-datasets.sh [schema]
-#   TEJIDO=data/tejido-YYYY-MM-DD.geojson LIVE=data/live-osm-YYYY-MM-DD.osm IMPORT_UID=N bin/import-datasets.sh run_x
-# Loads city_data and live_buildings into the schema (default public), replacing them.
-# TEJIDO needs its .source file beside it (bin/download-dataset.sh).
+#   TEJIDO=data/tejido-YYYY-MM-DD.geojson LIVE=data/live-osm-YYYY-MM-DD.osm OBRAS=data/obras-iniciadas-YYYY-MM-DD.csv IMPORT_UID=N bin/import-datasets.sh run_x
+# Loads city_data, live_buildings, live_at_cutoff and building_works into the schema (default
+# public), replacing them. TEJIDO needs its .source file beside it (bin/download-dataset.sh),
+# LIVE its .cutoff file (bin/fetch-live.sh); OBRAS comes from bin/download-obras.sh.
 
 set -e
 
@@ -16,6 +17,17 @@ if [ ! -s "${SOURCE_FILE}" ]; then
     exit 1
 fi
 LIVE="${LIVE:-$(ls "${DATA_DIR}"/live-osm-*.osm | sort | tail -1)}"
+CUTOFF_FILE="${LIVE%.osm}.cutoff"
+if [ ! -s "${CUTOFF_FILE}" ]; then
+    echo "Error: ${CUTOFF_FILE} is missing; bin/fetch-live.sh writes it" >&2
+    exit 1
+fi
+OBRAS="${OBRAS:-$(ls "${DATA_DIR}"/obras-iniciadas-*.csv | sort | tail -1)}"
+OBRAS_HEADER="periodo,long,lat,exp_dgroc,calle,callenro,seccion,manzana,parcela,fecha_inicio_obra,estado,ultimo_avo_solicitado,fecha_ultimo_avo,estadotramite,profesional,metrosaconstruir,fecha_estado_tramite,tipo_obra,destino,barrios,comuna,codigo_postal,codigo_postal_argentino"
+if [ "$(head -1 "${OBRAS}" | tr -d '\r\357\273\277' | tr 'A-Z' 'a-z')" != "${OBRAS_HEADER}" ]; then
+    echo "Error: ${OBRAS} does not have the expected columns" >&2
+    exit 1
+fi
 PG="PG:host=localhost port=6543 dbname=osm_db user=osm password=password"
 
 PGPASSWORD=password psql -h localhost -p 6543 -U osm osm_db -qc "CREATE SCHEMA IF NOT EXISTS \"${SCHEMA}\""
@@ -70,3 +82,26 @@ DROP TABLE IF EXISTS "${SCHEMA}".changeset_source;
 CREATE TABLE "${SCHEMA}".changeset_source (tag TEXT NOT NULL);
 INSERT INTO "${SCHEMA}".changeset_source VALUES (:'tag');
 SQL
+
+# The data date (PLAN 4.9, 4.10), from the changeset source tag; the cutoff of 127
+PGPASSWORD=password psql -h localhost -p 6543 -U osm osm_db -q -v ON_ERROR_STOP=1 <<SQL
+DROP TABLE IF EXISTS "${SCHEMA}".data_date;
+CREATE TABLE "${SCHEMA}".data_date AS
+SELECT substring(tag FROM ', ([0-9-]+)\)$')::DATE AS cutoff FROM "${SCHEMA}".changeset_source;
+SQL
+
+# Ways and relations tagged building=* at the data date (PLAN 4.9), from the .cutoff file
+PGPASSWORD=password psql -h localhost -p 6543 -U osm osm_db -q -v ON_ERROR_STOP=1 <<SQL
+DROP TABLE IF EXISTS "${SCHEMA}".live_at_cutoff;
+CREATE TABLE "${SCHEMA}".live_at_cutoff (type TEXT NOT NULL, id BIGINT NOT NULL, PRIMARY KEY (type, id));
+SQL
+PGPASSWORD=password psql -h localhost -p 6543 -U osm osm_db -q -v ON_ERROR_STOP=1 \
+    -c "\\copy \"${SCHEMA}\".live_at_cutoff FROM '${CUTOFF_FILE}'"
+
+# Building works started in the city (PLAN 4.10), as delivered; 127 reads the SMP and date
+PGPASSWORD=password psql -h localhost -p 6543 -U osm osm_db -q -v ON_ERROR_STOP=1 <<SQL
+DROP TABLE IF EXISTS "${SCHEMA}".building_works;
+CREATE TABLE "${SCHEMA}".building_works ($(echo "${OBRAS_HEADER}" | sed 's/,/ TEXT, /g') TEXT);
+SQL
+PGPASSWORD=password psql -h localhost -p 6543 -U osm osm_db -q -v ON_ERROR_STOP=1 \
+    -c "\\copy \"${SCHEMA}\".building_works FROM '${OBRAS}' WITH (FORMAT csv, HEADER true)"

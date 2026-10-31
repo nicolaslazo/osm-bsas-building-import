@@ -16,6 +16,7 @@ FROM (
                    CASE WHEN s.split_by_overlap THEN 'footprint split by an overlap' END,
                    CASE WHEN w.sid IS NOT NULL THEN 'Live has parts' END,
                    CASE WHEN NOT s.valid THEN 'invalid geometry' END,
+                   CASE WHEN ws.sid IS NOT NULL THEN 'building work since the data date' END,
                    CASE WHEN EXISTS (SELECT 1 FROM contacts c WHERE c.sid = s.sid)
                         THEN 'overlaps an OSM building without a link' END]
                END, NULL), '{}') AS reasons
@@ -23,5 +24,6 @@ FROM (
     LEFT JOIN member m ON m.id = s.sid
     LEFT JOIN live_groups g ON g.grp = m.grp
     LEFT JOIN with_parts w ON w.sid = s.sid
+    LEFT JOIN works_structures ws ON ws.sid = s.sid
 ) r;
 ALTER TABLE classification ADD PRIMARY KEY (sid);

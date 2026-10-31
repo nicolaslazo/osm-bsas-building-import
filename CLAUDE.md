@@ -11,8 +11,8 @@ This project processes Buenos Aires building data from official government sourc
 - Database runs on port 6543 with credentials: `osm:password@localhost:6543/osm_db`
 
 ### Data Pipeline
-1. Download datasets: `bin/download-dataset.sh` (city data, `data/tejido-<date>.geojson` plus its `.source` file, the changeset source tag) and `bin/fetch-live.sh` (Live OSM fetch, `data/live-osm-<date>.osm`)
-2. Import datasets: `TEJIDO=... LIVE=... IMPORT_UID=... bin/import-datasets.sh <schema>` (`IMPORT_UID` is the import account's OSM uid; leave it unset until that account has uploaded)
+1. Download datasets: `bin/download-dataset.sh` (city data, `data/tejido-<date>.geojson` plus its `.source` file, the changeset source tag), `bin/fetch-live.sh` (Live OSM fetch, `data/live-osm-<date>.osm`, plus its `.cutoff` file, the buildings tagged at the data date) and `bin/download-obras.sh` (building works, `data/obras-iniciadas-<date>.csv`)
+2. Import datasets: `TEJIDO=... LIVE=... OBRAS=... IMPORT_UID=... bin/import-datasets.sh <schema>` (`IMPORT_UID` is the import account's OSM uid; leave it unset until that account has uploaded)
 3. Run transformations: `bin/run-migrations.sql [schema]` (runs `migrations/*.sql` in numeric order; stops at the first error)
 4. Generate result sets: `.venv/bin/python migrations/500-create-changefiles.py <schema>` (writes `changesets/<schema>/`; venv setup in the script header, it needs the system GDAL bindings)
 5. Before the next release round: `python3 migrations/510-clean-up-reshape-orphans.py changesets/<schema>` (checks the old nodes Reshape left unused and writes their deletion; uploads nothing)
