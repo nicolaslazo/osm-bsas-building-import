@@ -830,6 +830,14 @@ resolve. Informal discussion can continue in the existing forum thread
       closed: a new cause found later is added as a new subtype.
       Added (2026-09-26): footprint split by an overlap (2.6). It is decided
       before any Live check, and it holds the structure's whole link group.
+      Added (2026-10-19): overlaps an OSM feature other than a building
+      (4.7). It applies to structures that would be New and to Reshape
+      groups, which it holds whole.
+      Added (2026-10-31): OSM building mapped after the data date (4.9),
+      for link groups only; building work since the data date (4.10), for
+      link groups and for structures that would be New.
+      Added (2026-10-31): group overlap under half of a side (4.11), for
+      link groups only.
       Decision (reasons, 2026-09-13): reasons are not published. No tag, no
       side file. The pipeline's database keeps every reason that applies to
       each structure; a question about a rejection is answered with a query.
@@ -962,6 +970,278 @@ resolve. Informal discussion can continue in the existing forum thread
       Duplicate nodes across file borders do not occur: a block is bounded by
       streets, so buildings of different blocks share no wall, and 090 and 100
       already partition by block.
+- [x] **4.7 Hold structures that overlap other OSM features.** 4.3 and
+      4.5 compare structures only with Live buildings. Nothing checks streets,
+      railways, water or open-space areas, and JOSM's validator reports a
+      building that crosses a highway, railway or waterway on the same layer.
+      Found (2026-10-19; `run_20260927` New set against OSM features fetched
+      that day, not from Live; scratch schema `other_osm`):
+      - Features fetched inside the CABA boundary: ways with `highway`,
+        `area:highway`, `railway` or `waterway`; `natural=water`;
+        `leisure=park|pitch|playground|garden|track`; `amenity=parking`;
+        `landuse=railway|grass|cemetery`.
+      - Contact: the feature intersects the structure shrunk by 0.5 m, so a
+        way that only touches a wall does not count.
+      - 5,852 of 371,754 New structures (1.6%) overlap a feature; 930 of them
+        have more than one footprint. 3,487 cross a way (3,007 at ground
+        level; 519 a way with a tunnel, bridge, covered, indoor or layer tag),
+        2,785 overlap an area, 420 both.
+      - Ways, structures per class: footway 1,694, residential street and
+        above 490, `railway=razed` 373, `railway=abandoned` 297,
+        `highway=service` 242, `railway=proposed` 172, `railway=subway` 105,
+        stream 125, active rail and tram at ground level 14, others under 50
+        each.
+      - Areas, structures per class: park 854, cemetery 641,
+        `landuse=railway` 380, grass 365, parking 359, pitch 136, garden 97,
+        playground 41, others under 30 each (`natural=water` 7).
+      - Streets at ground level enter 111 of the 490 structures more than
+        2 m, 8 more than 4 m, none more than 8 m: most are centerlines that
+        clip a corner. Only 29 of the 490 have an ordinary SMP; 294 have no
+        SMP, 118 are asentamientos informales, 49 have an Outlier SMP.
+        Footways: 773 of 1,694 are in asentamientos informales.
+      - Deep crossings are mostly structures over a way: the footbridge over
+        Av. del Libertador at Plaza de la Shoá, the Paseo del Bajo ramps, the
+        Premetro along Av. Mariano Acosta. At Parque Elefante Blanco the
+        footprints may predate the park.
+      - The footprints of Barrio Padre Mugica (Barrio 31) have no SMP and are
+        not coded `BEM`, so 1.5 does not treat them as an asentamiento
+        informal.
+      Decision (2026-10-19): a structure that would be New and overlaps any
+      fetched feature (contact as above) goes to Conflicts ("overlaps an OSM
+      feature other than a building", 4.4). Every class counts, at every
+      layer, including cemeteries, parks and disused rail. A person decides
+      each one; it stays in Conflicts in later release rounds while the
+      overlap remains.
+      Found (2026-10-19, Reshape; same run, features and contact test;
+      areas that are buildings, such as the inner rings of a park
+      multipolygon, excluded):
+      - 1,296 of 22,078 Reshape structures (5.9%) overlap a feature, in 1,164
+        of 18,389 groups. Ways: footway 177, service 136, streets 64, stream
+        60, subway 40, proposed rail 30, razed rail 17, active rail 5.
+        Areas: park 292, `landuse=railway` 162, grass 162, parking 151,
+        garden 78, pitch 36, cemetery 28.
+      - In 567 of the 1,164 groups every overlapped feature is already
+        overlapped by the group's Live building (same test): Reshape would
+        move an existing overlap, not add one. The other 597 groups add at
+        least one.
+      Decision (2026-10-19, Reshape): a 1:1, N:1 or merged 1:N group with any
+      structure that overlaps a fetched feature goes to Conflicts, whole,
+      with the same reason. It counts as held for the neighbour rule (4.3),
+      so its Live building stays and holds the groups that overlap it. An
+      overlap that Live already has counts the same as a new one.
+      Measured (simulated on `run_20260927` with 140's loop): 1,164 groups
+      (1,556 structures) held by a feature, 245 more groups (368 structures)
+      by the chain, 8 iterations. Reshape falls from 18,389 groups to 16,980
+      and from 22,078 structures to 20,154.
+      Implementation:
+      - 6.2: `bin/fetch-live.sh` also fetches these features in the same
+        Overpass request, so they come from the same Live snapshot as the
+        buildings. `bin/import-datasets.sh` loads them into `live_features`
+        (lines and areas, with `tunnel`, `bridge`, `covered`, `layer`,
+        `indoor` and `location` kept; areas tagged `building` dropped).
+      - New migration `135-feature-contacts.sql`, after 130 and before 140:
+        one row per structure that overlaps a feature, with the OSM ids it
+        overlaps. It adds the reason to the link groups of those structures
+        (`live_groups.reasons`), so 140 treats them as Conflicts. 150 adds the
+        reason in its no-group branch.
+      Considered and dropped: ground-level crossings only (about 2,400
+      structures; areas, disused rail and ways with a tunnel, bridge or layer
+      tag stay New); ground-level crossings plus `natural=water`. For
+      Reshape: only groups that add an overlap Live does not have (597).
+
+- [ ] **4.8 Implement 4.7.** Decided 2026-10-19, not implemented:
+      `bin/fetch-live.sh` does not fetch the features, `bin/import-datasets.sh`
+      has no `live_features`, and `135-feature-contacts.sql` does not exist.
+      Steps as in 4.7's Implementation list, including the reason in 150's
+      no-group branch. Check against 4.7's simulation on `run_20260927`:
+      5,852 New structures held; Reshape falls to 16,980 groups and 20,154
+      structures.
+      Paused (2026-10-31) until 2.7 is implemented: the offset correction
+      is expected to remove part of these overlaps, so 4.7's counts are
+      measured again after it.
+      Measured after 2.7 (2026-10-31): the correction removes about 1 % of
+      the overlaps (5,788 New structures, 599 Reshape groups; see 2.7).
+
+- [x] **4.9 Hold Reshape groups whose Live building was mapped after the
+      dataset date.** The dataset is a 2021 snapshot (6.9). A Live building
+      first mapped after that date may stand where the footprint's building
+      was demolished, so Reshape would replace it with an older shape; or it
+      may have existed in 2021 and been mapped late. The pipeline cannot tell
+      the two apart. A building mapped before the date existed then, so the
+      dataset covers it.
+      Proposal: a link group with any Live building first mapped after the
+      cutoff goes to Conflicts, whole, with a new reason (4.4). New is not
+      affected: its structures overlap no Live building.
+      To measure at implementation: counts on `run_20260927`.
+      Reopened 6.9's decision of 2026-09-27 (no rule for buildings built or
+      demolished since 2021) for buildings built since (2026-10-24).
+      Decision (2026-10-24, cutoff): 2021-05-10, the file's `Last-Modified`.
+      The photogrammetry date is not known. A building built between the
+      survey and that date is absent from the dataset but counts as mapped
+      in time.
+      Decision (2026-10-24, redrawn buildings): the rule reads only the way's
+      version 1. A building mapped before the cutoff and redrawn as a new way
+      after it counts as mapped late, and its group goes to Conflicts.
+      Considered and dropped: finding a deleted way at the same place in the
+      history and taking its date; it needs the full-history extract and a
+      geometry match against deleted ways.
+      Decision (2026-10-24, neighbours): a group held by this rule counts as
+      held for the neighbour rule (4.3), as 4.7's does. Its Live building
+      stays and holds the groups that overlap it.
+      Decision (2026-10-24, source of the date): `fetch-live.sh` runs a
+      second Overpass query with `[date:"2021-05-10T00:00:00Z"]` that returns
+      the ids of the ways tagged `building=*` at the cutoff. A Live building
+      whose way is not in that list was mapped late. A way that existed then
+      but took `building=*` later also counts as mapped late, as a redrawn
+      building does. `out meta` gives only the current version's timestamp
+      and the import drops it (`osm_timestamp=no`).
+      Considered and dropped: the OSM API's per-way history (about 20,000
+      calls, against its usage policy); a full-history extract filtered with
+      osmium (Geofabrik's needs an OSM login, plus the download and
+      processing).
+      Implemented (2026-10-31) with 4.10: `bin/fetch-live.sh` writes
+      `<live>.cutoff` (type and id of each way and relation tagged
+      `building=*` at the cutoff). Overpass applies no area filter to a
+      dated query (the city area returned 16 ways of 140 in a test box),
+      so the query takes a box around the city. The cutoff is the date in
+      the newest `.source` file. `bin/import-datasets.sh` loads
+      `live_at_cutoff` and `data_date`; `127-data-date.sql` builds
+      `late_live`; 130 adds the reason "OSM building mapped after the
+      data date". Measured on `run_20260927`'s inputs (schema
+      `dated_test`, link rule as in 130, not option E): 44,944 ids at the
+      cutoff; 8,957 of 40,996 Live buildings mapped late; 6,094 link
+      groups carry the reason. Three late ways checked against their OSM
+      history: first version in 2022 to 2024; two on-time ways: 2019.
+
+- [x] **4.10 Find a dataset of building works and demolitions since 2021.**
+      A footprint whose building was demolished after the dataset date and
+      is absent from Live is published as New (6.9). A register of
+      demolition and new-construction permits, with dates and a location
+      (SMP or coordinates), would let the pipeline hold those structures.
+      To research: candidate sources (data.buenosaires.gob.ar first), their
+      date range and coverage, how they join to footprints (SMP if present),
+      and whether their license allows the use, as the Tejido's does. If one
+      fits: a rule that sends a structure on a parcel with a qualifying
+      permit after the cutoff (4.9) to Conflicts. Reopened 6.9's decision of
+      2026-09-27 for buildings demolished since (2026-10-24).
+      Found (2026-10-31): two datasets on data.buenosaires.gob.ar, both
+      CC-BY-2.5-AR and updated monthly.
+      - "Obras Iniciadas" (AGC, Dirección General Fiscalización y Control
+        de Obras): works registered with DGROC that have started, with a
+        Director de Obra. Current file
+        `cdn.buenosaires.gob.ar/datosabiertos/datasets/agencia-gubernamental-de-control/obras-iniciadas/obras_iniciadas.csv`
+        (`Last-Modified` 2026-10-05): 16,218 works, `fecha_inicio_obra`
+        2016-08-17 to 2026-10-30, every row with `seccion`, `manzana`
+        and `parcela`, and coordinates in GKBA (Campo Inchauspe). The
+        historical file `obras-iniciadas.csv` (22,100 rows, `periodo`
+        2025 only, half without a start date) adds nothing usable.
+        Copies in `data/obras/`.
+      - "Obras Registradas" (DGROC): registered works with `smp`, date
+        and type ("Obra nueva", "Permiso de demolición"); registration,
+        not start. The portal rejects scripted downloads and the CDN path
+        is not known; not downloaded.
+      Measured on "Obras Iniciadas" against `run_20260927` and `sim_e`
+      (scratch schema `obras`): works started on or after 2021-05-10 of
+      type "demolición total", "obra nueva" or both fall on 5,403
+      parcels; 4,794 of them carry structures, 6,130 structures in all
+      (5,631 N, 129 R in 126 groups, 370 C). Of the 609 parcels without
+      a structure, 567 are in blocks the dataset has. The SMP join agrees
+      with the works' coordinates: median 0.4 m, 99 % within 14 m.
+      "Demolición total y obra nueva" is used mostly before 2021; since
+      then the two are filed as separate works (188 combined against
+      4,748 "demolición total" and 3,676 "obra nueva").
+      Decision (2026-10-31, which works count): every type, partial
+      demolitions and enlargements included, from its start date
+      (`fecha_inicio_obra`), finished or not. A started work implies a
+      demolition, and an enlargement leaves the original footprint out of
+      date. With every type: 7,231 parcels, 6,486 with structures, 8,376
+      structures (7,578 N, 200 R in 195 groups, 598 C).
+      Checked (2026-10-31, sample): 40 New structures on these parcels,
+      10 per kind of work (seed fixed in `obras.muestra`), each drawn over
+      the 2021 orthophoto and Esri (`data/muestra-obras/casos/`). In the
+      orthophoto the footprint matches the building in nearly every case.
+      In Esri:
+      - Total demolition: 9 changed (empty lot, excavation or a new
+        building), 1 unclear.
+      - New construction: 9 changed, 1 unclear (a small shed).
+      - Enlargement or partial demolition: 6 with a changed roof or a new
+        volume, 4 unclear or unchanged; the outline still fits in most.
+      - Modification or regularisation only: 2 changed, 1 unchanged, 7
+        unclear (shadows, trees, or a work started after the Esri image).
+      Esri's capture date is not known, so "unclear" includes works that
+      Esri has not caught up with.
+      Found in the same sample: in three cases (SMP 83-88-014, 13-75-036A,
+      51-65-026) the 2021 orthophoto shows an empty lot or vegetation
+      under the footprint. The footprints there predate the 2021
+      orthophoto, so the photogrammetry is older than 2021-05-10, the
+      cutoff of 4.9.
+      Decision (2026-10-31, dataset date): the gap between the
+      photogrammetry and 2021-05-10 is taken as negligible. 4.9 and 4.10
+      keep 2021-05-10 as the cutoff; the photogrammetry is not dated.
+      Some false results are accepted.
+      Implemented (2026-10-31): `bin/download-obras.sh` writes
+      `data/obras-iniciadas-<download date>.csv`; `bin/import-datasets.sh`
+      checks its columns and loads it as `building_works`;
+      `127-data-date.sql` builds `works_structures` (SMP spelled as
+      `structures.pkey`, start date on or after the cutoff); 130 adds the
+      reason "building work since the data date" to link groups and 150
+      to structures in no group. A group with either reason holds its
+      neighbours (140), as 4.7's does.
+      Measured on `run_20260927`'s inputs (schema `dated_test`, with 4.9,
+      link rule as in 130): N 371,754 → 364,176, R 22,078 → 16,288,
+      C 36,521 → 49,842 (7,578 N→C, 5,743 R→C). 8,376 structures carry
+      the works reason, 417 link groups. 5,429 groups are Conflicts only
+      for the 4.9 or 4.10 reasons. Gate 2 passes.
+
+- [x] **4.11 Hold link groups whose two sides differ in size.** The link
+      rule (4.3) measures the overlap against the smaller shape, so a small
+      Live building inside a much larger structure links at 100 %. Such a
+      group is Reshape, and the small building's tags (a shop, a clinic)
+      move to the large structure.
+      Found (2026-10-17, `run_20260927`): requiring more than half of each
+      shape on every link (reciprocal link) breaks 30,021 of 48,535 links:
+      25 % in 1:1 groups, 89 % in N:1, 88 % in 1:N and 91 % in N:M. In a
+      correct N:1 group no structure covers half of the Live building, so
+      each link fails although the group matches. 9,521 of 22,078 Reshape
+      structures would go to Conflicts.
+      Options compared (Reshape structures sent to Conflicts, before the
+      neighbour rule):
+      - A, reciprocal link everywhere: 9,521.
+      - B, reciprocal link in 1:1 groups only: 3,779 (5,115 links).
+      - C, no link in 1:1 when one shape exceeds X times the other: 2,354
+        (×2), 1,010 (×3), 405 (×5), 162 (×10).
+      - D, B only where the Live building has a name, shop or amenity:
+        1,258.
+      - E, reciprocal overlap per link group: 4,527 (6,027 groups).
+      - F, E only where a Live building of the group has a name, shop or
+        amenity: 1,317.
+      Decision (2026-10-17): option E. Links stay as in 4.3. A link group
+      is Reshape only if the union of its structures and the union of its
+      Live buildings overlap in more than half of the larger union; the
+      shapes are those compared in 130 (`structure_shapes`,
+      `live_shapes`). A group that fails goes to Conflicts, whole, with
+      the reason "group overlap under half of a side" (4.4). It counts as
+      held for the neighbour rule (4.3), so its Live buildings stay and
+      hold the groups that overlap them.
+      Considered and dropped: A (breaks nearly every correct N:1 and 1:N
+      group); B and C (leave N:1 and 1:N untested); D and F (tags are not
+      the only harm: a much smaller Live shape also says the two do not
+      describe the same building).
+      Measured (simulated on `run_20260927`, schema `sim_e`, baseline in
+      `sim_base`): 6,027 groups fail (1:1 5,115, N:1 574, 1:N 327, N:M
+      11); 5,759 of them have no other reason. N 371,754 (unchanged),
+      R 22,078 → 14,988 structures and 18,389 → 12,189 groups, C 36,521 →
+      43,611; 8,114 Reshape tasks. Vélez Sarsfield pilot: 199 N, 7 R,
+      31 C. These counts predate 4.9 and 4.10; `import.wikitext` quotes
+      them and needs the figures of a run with all three rules.
+      Implemented (2026-10-31): 130 computes `group_overlap` (the overlap
+      of the two unions over the larger union) for each link group and
+      adds the reason when it is 0.5 or less. Reproduces `sim_e`'s
+      flag on all 28,436 groups.
+      Measured with 4.9 and 4.10 (130-160 on `dated_test`, rolled back):
+      N 364,176 (unchanged), R 16,288 → 10,836 structures, C 49,842 →
+      55,294; 9,086 Reshape groups. 6,027 groups carry the reason, 4,746
+      with no other. 140 settles after 13 iterations. Gate 2 passes.
 
 ## Phase 5 — Verification
 
