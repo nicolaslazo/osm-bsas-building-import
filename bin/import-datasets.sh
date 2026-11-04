@@ -1,9 +1,11 @@
 #!/bin/bash
 # Usage: bin/import-datasets.sh [schema]
 #   TEJIDO=data/tejido-YYYY-MM-DD.geojson LIVE=data/live-osm-YYYY-MM-DD.osm OBRAS=data/obras-iniciadas-YYYY-MM-DD.csv IMPORT_UID=N bin/import-datasets.sh run_x
-# Loads city_data, live_buildings, live_at_cutoff and building_works into the schema (default
-# public), replacing them. TEJIDO needs its .source file beside it (bin/download-dataset.sh),
-# LIVE its .cutoff file (bin/fetch-live.sh); OBRAS comes from bin/download-obras.sh.
+# Loads city_data, live_buildings, live_at_cutoff, building_works and offset_blocks into the
+# schema (default public), replacing them. TEJIDO needs its .source file beside it
+# (bin/download-dataset.sh), LIVE its .cutoff file (bin/fetch-live.sh); OBRAS comes from
+# bin/download-obras.sh, OFFSET_BLOCKS (default the newest fixtures/offset-blocks-*.csv)
+# from bin/measure-offset.py.
 
 set -e
 
@@ -28,6 +30,7 @@ if [ "$(head -1 "${OBRAS}" | tr -d '\r\357\273\277' | tr 'A-Z' 'a-z')" != "${OBR
     echo "Error: ${OBRAS} does not have the expected columns" >&2
     exit 1
 fi
+OFFSET_BLOCKS="${OFFSET_BLOCKS:-$(ls "${PROJECT_ROOT}"/fixtures/offset-blocks-*.csv | sort | tail -1)}"
 PG="PG:host=localhost port=6543 dbname=osm_db user=osm password=password"
 
 PGPASSWORD=password psql -h localhost -p 6543 -U osm osm_db -qc "CREATE SCHEMA IF NOT EXISTS \"${SCHEMA}\""
@@ -105,3 +108,12 @@ CREATE TABLE "${SCHEMA}".building_works ($(echo "${OBRAS_HEADER}" | sed 's/,/ TE
 SQL
 PGPASSWORD=password psql -h localhost -p 6543 -U osm osm_db -q -v ON_ERROR_STOP=1 \
     -c "\\copy \"${SCHEMA}\".building_works FROM '${OBRAS}' WITH (FORMAT csv, HEADER true)"
+
+# Blocks off the formal offset vector and the vector each one takes (PLAN 2.7), for 087
+PGPASSWORD=password psql -h localhost -p 6543 -U osm osm_db -q -v ON_ERROR_STOP=1 <<SQL
+DROP TABLE IF EXISTS "${SCHEMA}".offset_blocks;
+CREATE TABLE "${SCHEMA}".offset_blocks (
+    block TEXT PRIMARY KEY, east DOUBLE PRECISION NOT NULL, north DOUBLE PRECISION NOT NULL);
+SQL
+PGPASSWORD=password psql -h localhost -p 6543 -U osm osm_db -q -v ON_ERROR_STOP=1 \
+    -c "\\copy \"${SCHEMA}\".offset_blocks FROM '${OFFSET_BLOCKS}' WITH (FORMAT csv, HEADER true)"

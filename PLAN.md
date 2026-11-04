@@ -219,6 +219,179 @@ resolve. Informal discussion can continue in the existing forum thread
       the same when a new file reorders its records but costs more and can
       tie.
 
+- [x] **2.7 Measure and correct the dataset's offset against the 2021
+      orthophotos.** The footprints appear shifted from the city's 2021
+      orthophotos. Unknown: whether the shift is one vector for the whole
+      city or varies by area (by seccion, or by photogrammetry flight strip).
+      To do:
+      - Measure the offset at control points spread across the city, in
+        both axes, and map the vectors.
+      - One vector: a single translation in a migration. Varying vectors: a
+        correction field interpolated between control points, which no
+        longer moves shared walls rigidly and must run before 090 so
+        coverage cleaning sees the corrected positions.
+      - Re-measure 4.3 and 4.7 after the correction: the link rule and the
+        feature contacts both depend on position.
+      Decision (2026-10-24, reference): the city's 2021 orthophoto, the
+      same source as the dataset.
+      Decision (2026-10-24, disagreement with other imagery): the
+      orthophoto is the source of truth. The footprints are corrected
+      toward it even where Esri or Bing, the imagery most Live buildings
+      were traced from, disagree. The correction can raise or lower link
+      overlaps with Live; the 4.3 re-measurement covers that. The wiki
+      tells reviewers to check against the city's orthophoto.
+      To do: measure the orthophoto against Esri and Bing at the same
+      control points, to know how far Live may sit from the corrected
+      footprints.
+      Measured (2026-10-24, first pass, `run_20260927`): seven control
+      points, six at the edges of the city (Núñez, Villa Pueyrredón,
+      Liniers, Villa Lugano, Nueva Pompeya, La Boca) and one in the centre
+      (Caballito). Each is a 400 m window of the orthophoto at z18 (about
+      0.5 m per pixel); the shift is the translation of the footprint
+      outlines (altura up to 12 m, no asentamientos informales) that best
+      matches the image's edges. Every point gives a single sharp peak.
+      The footprints need to move 1.74 to 1.97 m north (mean 1.86) and
+      0.25 to 0.49 m west (mean 0.38). The spread between points is below
+      the pixel size: no sign of rotation, scale or a trend across the
+      city. Seven windows cover about 1 km² of the city's 200, so a local
+      step (a flight strip, a patched area) would not show.
+      Measured (2026-10-24, second pass): a 1 km grid, 160 windows with at
+      least 150 low footprints, same method. 158 give the same vector:
+      median 1.86 m north and 0.41 m west, standard deviation 0.08 m and
+      0.07 m. No flight strip or regional step shows. The two that differ
+      fall on asentamientos informales whose footprints carry no SMP, so
+      the first passes did not exclude them. Measured with only their own
+      footprints:
+      - Barrio Padre Mugica (Villa 31, Retiro), no SMP: 2.4 m north and
+        1.6 m east.
+      - The no-SMP cluster centred at -34.6715, -58.4910 (south-west of the
+        city; settlement name not verified) and the `BEM*` asentamientos
+        informales, all in Barracas (Villa 21-24): no shift (under 0.35 m,
+        below the pixel size).
+      Measured (2026-10-24, borders): each block within 1.3 km of the three
+      settlements measured on its own (footprints without a block grouped
+      by contiguity). Every block falls clearly on one vector; the borders
+      follow streets. The patches are areas, not footprint types: blocks
+      with ordinary SMPs west of Villa 21-24 have no shift either, and the
+      dataset's `id` ranges do not separate them. Ciudad Oculta's patch
+      also covers neighbouring housing estates. Other patches appeared
+      without being searched for: port buildings and block 11-40
+      (Recoleta). The city's 2017 orthophoto shows the same pattern, so
+      the patches are in the dataset, not in one orthophoto; Esri is not
+      consistent between areas.
+      Consequence: the correction is assigned per area, and the block is
+      the natural unit. Delimiting the patches needs every block in the
+      city measured, not only these three areas.
+      Decision (2026-10-25, scope): one vector for the formal city, 1.86 m
+      north and 0.41 m west. Blocks measured as a patch are left as
+      delivered, Villa 31 included: its footprints stay about 2.9 m off
+      the orthophoto (2.39 m north, 1.56 m east). The correction is a rigid
+      translation applied per block, with no interpolated field.
+      Plan (2026-10-25, coverage without downloading the city at z18):
+      classify every block at a lower zoom, then measure at z18 only the
+      blocks the coarse pass cannot settle.
+      Measured (2026-10-25, resolution check): the 474 blocks already
+      measured, re-measured on the cached z18 tiles reduced to z17 and z16.
+      Classes: formal (within 0.6 m of the formal vector), patch (within
+      0.6 m of zero or of the Villa 31 vector) or undecided.
+      - z17 (1 m per pixel): no block changes between formal and patch.
+        54 blocks (11 %) come out undecided: 29 formal, 17 patch and 8
+        undecided at z18. Patch blocks are undecided more often than formal
+        ones, among them block 11-40.
+      - z16 (2 m per pixel): unusable. 196 blocks disagree with z18.
+      Rule: a block classed as formal at z17 is final. Every other block is
+      measured at z18. Not yet checked: that the server's own z17 tiles
+      behave like the reduced z18 tiles.
+      Checked (2026-10-25): the server's z17 tiles, downloaded over the same
+      474 blocks, leave more blocks undecided (16 % against 11 %) but still
+      move no block between formal and patch.
+      Measured (2026-10-25, z17 sweep): 11,790 units (blocks, and
+      footprints without SMP or in asentamientos informales grouped by 8 m
+      contiguity); the 10,856 with at least 12 low footprints were
+      measured. 10,198 formal, 39 patch at zero, 8 at the Villa 31 vector
+      and 611 undecided. 2,582 z17 tiles downloaded (about 410 MB); the
+      rest were built from cached z18 tiles.
+      Measured (2026-10-25, z18 pass): the 658 units not classed as formal
+      at z17, fetching only the tiles within 20 m of their footprints
+      (2,049 tiles, about 320 MB). 424 formal, 71 patch at zero, 4 at the
+      Villa 31 vector, 159 still undecided. No unit classed as patch at
+      z17 came out formal at z18.
+      - Patches: 75 units, 24,201 low footprints. Most are in the three
+        known areas; 35 units (1,593 footprints) are spread over the rest
+        of the city, mostly small. One block away from Villa 31 (61-13D)
+        carries the Villa 31 vector.
+      - Patch vectors at zero have a residual of 0.1 to 0.55 m north,
+        below the pixel size. Not relevant: patches are left as delivered.
+      - Undecided at z18: 159 units, 7,822 footprints, block 11-40 among
+        them (0.14 m east, 0.60 m north). 50 sit nearer the formal vector,
+        36 nearer zero, 5 nearer Villa 31; 68 are more than 1.5 m from all
+        three, which suggests a failed measurement (few edges) rather than
+        another vector.
+      - Not measured (fewer than 12 low footprints): 934 units, 4,070
+        footprints.
+      Decision (2026-10-31, units without a reliable vector): an undecided
+      unit takes the class of the nearest vector: near zero or the Villa 31
+      vector, it is left as delivered; near the formal vector, it gets the
+      formal vector. Units more than 1.5 m from every vector, and units
+      with fewer than 12 low footprints, take their neighbours' class: left
+      as delivered when every block around them is a patch, the formal
+      vector otherwise.
+      Lost (2026-10-31): the per-unit results and the tile caches were kept
+      in /tmp and a reboot wiped them; only the summaries above survive.
+      Implementing the correction needs the z17 and z18 passes run again,
+      with the tiles and the per-unit table kept in a persistent directory.
+      To do at that re-run: look at the units more than 1.5 m from every
+      vector (68 in the lost run) on the orthophoto and reconsider the
+      neighbour rule for them before applying it.
+      Measured again (2026-10-31, `bin/measure-offset.py`, the method of the
+      lost run recovered from its session; schema `offset_20260924`, run
+      through 085; tiles and per-unit tables in `data/offset/`): 11,789
+      units, 10,904 with at least 12 low footprints. z17 (3,300 tiles):
+      10,141 formal, 33 at zero, 7 at the Villa 31 vector, 723 undecided.
+      z18 on the other 763 (4,975 tiles): 506 formal, 73 at zero, 4 at the
+      Villa 31 vector, 180 undecided; 82 of these more than 1.5 m from
+      every vector.
+      Checked (2026-10-31): the 82 units on the orthophoto, each with the
+      formal vector and with its own measured vector. About 78 are failed
+      measurements: open ground with no edges (parks, cemeteries, sports
+      grounds, rail) or tall buildings whose shadows and trees pull the
+      match; where roofs show, the formal vector fits them. The neighbour
+      rule stands for these. Three blocks carry a real vector of their own,
+      far from the three known ones, and their measured vector fits the
+      roofs: 54-126 (4.45 m west, 1.82 m north), 44-2L (6.94 m west,
+      4.89 m north) and 44-2R (10.13 m west, 13.14 m north), the last two
+      side by side in Bajo Flores.
+      Decision (2026-10-31): those three blocks move by their own measured
+      vector.
+      Result: 11,606 units formal, 164 at zero, 16 at the Villa 31 vector,
+      3 with their own vector. 1,084 blocks are off the formal vector: 447
+      at zero, 634 at the Villa 31 vector (most of them small no-SMP blocks
+      of 085 inside the asentamientos informales), 3 with their own. 13
+      blocks hold units of more than one class; each takes the class of
+      most of its low footprints.
+      Implemented (2026-10-31): `bin/measure-offset.py` (steps `units`,
+      `z17`, `z18`, `classify`) writes `fixtures/offset-blocks-2021-05-10.csv`,
+      the blocks off the formal vector with the vector each one takes
+      (zero for a patch). A no-SMP block is listed by the smallest source
+      id among its footprints, since 085 numbers those blocks by run.
+      `bin/import-datasets.sh` loads it into `offset_blocks`; new migration
+      `087-correct-offset.sql`, after 085 and before 090, moves every other
+      block 1.86 m north and 0.41 m west. On `offset_20260924`: 1,343,958
+      footprints moved (264 by their block's own vector), 30,915 left as
+      delivered; Gate 1 and Gate 2 pass.
+      Measured again after the correction (2026-10-31, `offset_20260924`
+      against `dated_test`, the same inputs uncorrected, option E in both):
+      - 4.3: links 48,488 to 47,955; median link overlap 0.868 to 0.899 of
+        the smaller shape; link groups 28,389 to 28,101. Groups that fail
+        option E: 6,027 to 6,111.
+      - Result sets: N 364,176 to 364,201, R 10,836 to 10,596, C 55,294 to
+        55,509 structures.
+      - 4.7 (features fetched 2026-10-19, schema `other_osm`; the same
+        structures with and without the correction): New structures that
+        overlap a feature 5,841 to 5,788; Reshape structures 669 to 658, in
+        609 to 599 of 8,871 groups. The correction removes about 1 % of the
+        overlaps, not a part that changes 4.7's decision.
+
 ## Phase 3 — Output model
 
 - [x] **3.1 Replace `500`'s hand-written XML with `ogr2osm`.** Reads PostGIS
@@ -1123,3 +1296,21 @@ resolve. Informal discussion can continue in the existing forum thread
       built or demolished since 2021. A structure demolished since then and
       absent from Live is New; slightly outdated data is better than none.
       The wiki states the date of the data.
+      Reopened (2026-10-24): buildings mapped in Live after the dataset
+      date (4.9) and buildings demolished since (4.10) go to Conflicts. The
+      2026-09-27 decision stands until those rules are implemented.
+- [ ] **6.10 Update the pilot to the corrected offset (2.7).** The pilot
+      (Vélez Sarsfield, seed block 54-93) was built from `run_20260927`,
+      before the correction. Its New file went up in changeset 190860628
+      with the footprints as delivered; Reforma and Conflictos were not
+      uploaded as of 2026-10-22.
+      To do, after 2.7 is implemented:
+      - Regenerate the pilot's Reforma and Conflictos files from a run with
+        the corrected positions, after a fresh Live fetch. The link rule
+        and the feature contacts depend on position, so the counts can
+        change.
+      - Move the New buildings already in Live by their block's vector,
+        unless a mapper has edited them since.
+      To decide: how the uploaded New buildings are moved (a modify
+      changeset from the import account, or a revert and a new upload),
+      and whether Reforma and Conflictos wait for this item.

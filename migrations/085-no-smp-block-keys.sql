@@ -33,6 +33,15 @@ FROM nosmp_groups g
 LEFT JOIN nosmp_reach r USING (grp)
 WHERE c.ogr_fid = g.ogr_fid;
 
+-- block: the key offset_blocks (087, bin/measure-offset.py) lists a block by. The no-SMP keys
+-- above are numbered by run, so a no-SMP block is named by the smallest source id among its
+-- footprints instead.
+ALTER TABLE city_data ADD COLUMN block TEXT;
+UPDATE city_data c
+SET block = CASE WHEN c.bkey LIKE 'nosmp-%' THEN 'nosmp:' || m.id ELSE c.bkey END
+FROM (SELECT bkey, MIN(id) AS id FROM city_data GROUP BY bkey) m
+WHERE m.bkey = c.bkey;
+
 DO $$
 BEGIN
     RAISE NOTICE '085: % no-SMP groups, % join a block (% footprints), % blocks in all',
