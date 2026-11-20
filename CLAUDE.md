@@ -28,6 +28,6 @@ This project processes Buenos Aires building data from official government sourc
 ### Data Flow
 1. **Input**: Two datasets
    - `data/tejido-<date>.geojson`: Buenos Aires city building dataset
-   - `data/live-osm-<date>.osm`: the Live OSM fetch
+   - `data/live-osm-<date>.osm`: the Live OSM fetch (buildings, and the streets, rail, water and open-space areas 135 checks for overlaps)
 2. **Processing**: Sequential SQL migrations transform and clean data; 170 groups neighbouring Reshape groups into Reshape tasks
 3. **Output**: result sets in `changesets/<schema>/`: New files per seccion, Conflicts files per block, one Reshape `.osc` per Reshape task

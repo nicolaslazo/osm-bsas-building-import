@@ -1,8 +1,8 @@
 #!/bin/bash
 # Usage: bin/import-datasets.sh [schema]
 #   TEJIDO=data/tejido-YYYY-MM-DD.geojson LIVE=data/live-osm-YYYY-MM-DD.osm OBRAS=data/obras-iniciadas-YYYY-MM-DD.csv IMPORT_UID=N bin/import-datasets.sh run_x
-# Loads city_data, live_buildings, live_at_cutoff, building_works and offset_blocks into the
-# schema (default public), replacing them. TEJIDO needs its .source file beside it
+# Loads city_data, live_buildings, live_features, live_at_cutoff, building_works and
+# offset_blocks into the schema (default public), replacing them. TEJIDO needs its .source file beside it
 # (bin/download-dataset.sh), LIVE its .cutoff file (bin/fetch-live.sh); OBRAS comes from
 # bin/download-obras.sh, OFFSET_BLOCKS (default the newest fixtures/offset-blocks-*.csv)
 # from bin/measure-offset.py.
@@ -70,6 +70,47 @@ ogr2ogr \
   -lco FID=ogr_fid \
   -lco SPATIAL_INDEX=GIST \
   "${LIVE}" multipolygons
+
+# OSM features other than buildings from the same fetch (PLAN 4.7), for 135: lines and areas
+# of the classes the fetch selects; areas tagged building or building:part dropped
+FEATURE_AREAS="building IS NULL AND \"building:part\" IS NULL AND (highway IS NOT NULL
+  OR \"area:highway\" IS NOT NULL OR railway IS NOT NULL OR waterway IS NOT NULL
+  OR \"natural\" = 'water' OR leisure IN ('park', 'pitch', 'playground', 'garden', 'track')
+  OR amenity = 'parking' OR landuse IN ('railway', 'grass', 'cemetery'))"
+for layer in lines multipolygons; do
+  if [ "${layer}" = lines ]; then
+    WHERE="highway IS NOT NULL OR railway IS NOT NULL OR waterway IS NOT NULL"
+  else
+    WHERE="${FEATURE_AREAS}"
+  fi
+  ogr2ogr \
+    -f "PostgreSQL" "$PG" \
+    -overwrite \
+    --config OSM_CONFIG_FILE "${PROJECT_ROOT}/bin/osmconf-features.ini" \
+    -where "${WHERE}" \
+    -nln "${SCHEMA}.live_features_${layer}" \
+    -nlt PROMOTE_TO_MULTI \
+    -lco GEOMETRY_NAME=geom \
+    -lco SPATIAL_INDEX=NONE \
+    "${LIVE}" "${layer}"
+done
+PGPASSWORD=password psql -h localhost -p 6543 -U osm osm_db -q -v ON_ERROR_STOP=1 <<SQL
+SET search_path = "${SCHEMA}", public;
+DROP TABLE IF EXISTS live_features;
+CREATE TABLE live_features AS
+SELECT 'way'::TEXT AS osm_type, osm_id::BIGINT AS osm_id, false AS is_area,
+       highway, NULL::TEXT AS area_highway, railway, waterway, NULL::TEXT AS "natural",
+       NULL::TEXT AS leisure, NULL::TEXT AS amenity, NULL::TEXT AS landuse,
+       tunnel, bridge, covered, layer, indoor, location, name, geom::geometry(Geometry, 4326) AS geom
+FROM live_features_lines
+UNION ALL
+SELECT CASE WHEN osm_id IS NULL THEN 'way' ELSE 'relation' END, COALESCE(osm_id, osm_way_id)::BIGINT, true,
+       highway, "area:highway", railway, waterway, "natural", leisure, amenity, landuse,
+       tunnel, bridge, covered, layer, indoor, location, name, geom::geometry(Geometry, 4326)
+FROM live_features_multipolygons;
+DROP TABLE live_features_lines, live_features_multipolygons;
+ALTER TABLE live_features ADD PRIMARY KEY (osm_type, osm_id);
+SQL
 
 # The import account's OSM uid (PLAN 5.3, 6.7), for 125 to recognise its uploads in Live;
 # unset before the account uploads anything

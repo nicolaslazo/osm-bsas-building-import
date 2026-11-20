@@ -1049,9 +1049,7 @@ resolve. Informal discussion can continue in the existing forum thread
       tag stay New); ground-level crossings plus `natural=water`. For
       Reshape: only groups that add an overlap Live does not have (597).
 
-- [ ] **4.8 Implement 4.7.** Decided 2026-10-19, not implemented:
-      `bin/fetch-live.sh` does not fetch the features, `bin/import-datasets.sh`
-      has no `live_features`, and `135-feature-contacts.sql` does not exist.
+- [x] **4.8 Implement 4.7.** Decided 2026-10-19.
       Steps as in 4.7's Implementation list, including the reason in 150's
       no-group branch. Check against 4.7's simulation on `run_20260927`:
       5,852 New structures held; Reshape falls to 16,980 groups and 20,154
@@ -1061,6 +1059,35 @@ resolve. Informal discussion can continue in the existing forum thread
       measured again after it.
       Measured after 2.7 (2026-10-31): the correction removes about 1 % of
       the overlaps (5,788 New structures, 599 Reshape groups; see 2.7).
+      Implemented (2026-11-03):
+      - `bin/fetch-live.sh` adds the 4.7 feature classes to the same
+        Overpass request, with their members and nodes. `leisure=track` is
+        fetched as relations too; the 4.7 scratch query fetched it as ways
+        only.
+      - `bin/import-datasets.sh` loads them into `live_features` (one row per
+        way or relation: `osm_type`, `osm_id`, `is_area`, the class tags,
+        `tunnel`, `bridge`, `covered`, `layer`, `indoor`, `location`, `name`).
+        Areas tagged `building` or `building:part` are dropped. A separate
+        GDAL config, `bin/osmconf-features.ini`, adds `area:highway` as an
+        area key. `osmconf-buildings.ini` is not changed: a tag made an
+        attribute there leaves `other_tags`, and 110 reads `other_tags` to
+        tell tagged Live buildings.
+      - `135-feature-contacts.sql`: `feature_contacts` (sid, the features as
+        `osm_type/osm_id`), and the reason on the link groups of those
+        structures. 150 adds the reason in its no-group branch.
+      Checked (2026-11-03, `offset_20260924` with `live_features` filled
+      from the 4.7 scratch features in `other_osm`, migrations 130 to 170
+      run again; earlier results kept in `other_osm.before_*`): Gate 2
+      passes. New falls from 364,201 to 358,413 structures: the 5,788 of 2.7,
+      all now Conflicts. Reshape falls from 8,871 groups to 8,263 (553 held
+      by a feature, 55 more by the neighbour rule, 13 iterations) and from
+      10,596 structures to 9,828. 2.7 counted 599 groups because its test
+      did not drop building areas; the other 46 groups touch only those
+      areas. 9,337 structures have a feature contact. 135 takes 47 s.
+      Not checked: the whole-city fetch with the new query. The change adds
+      the feature nodes to the file 500 reads, so 6.3's node reuse can also
+      join a new node to a street or park node at the exact same position
+      (7 digits). The next Live fetch shows whether that happens.
 
 - [x] **4.9 Hold Reshape groups whose Live building was mapped after the
       dataset date.** The dataset is a 2021 snapshot (6.9). A Live building

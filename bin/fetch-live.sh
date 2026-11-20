@@ -5,6 +5,9 @@
 # Every building and building:part inside the CABA boundary, their members and nodes, and,
 # without their own nodes, every other way that uses one of those nodes and every relation that
 # holds one of those ways. 500 needs those to know which old nodes and ways a Reshape may delete.
+# Also every OSM feature that 135 checks for overlaps (PLAN 4.7), with its members and nodes:
+# ways with highway, area:highway, railway or waterway; ways and relations with natural=water,
+# leisure=park|pitch|playground|garden|track, amenity=parking or landuse=railway|grass|cemetery.
 # Writes beside it <output minus .osm>.cutoff: the type and id of every way and relation tagged
 # building=* at the data date (PLAN 4.9), read from the newest data/tejido-*.source unless
 # CUTOFF=YYYY-MM-DD is given.
@@ -31,9 +34,25 @@ ${AREA}
 way.all->.w;
 node.all->.n;
 (
+  way[\"highway\"]${IN};
+  way[\"area:highway\"]${IN};
+  way[\"railway\"]${IN};
+  way[\"waterway\"]${IN};
+  way[\"natural\"=\"water\"]${IN};
+  relation[\"natural\"=\"water\"]${IN};
+  way[\"leisure\"~\"^(park|pitch|playground|garden|track)$\"]${IN};
+  relation[\"leisure\"~\"^(park|pitch|playground|garden|track)$\"]${IN};
+  way[\"amenity\"=\"parking\"]${IN};
+  relation[\"amenity\"=\"parking\"]${IN};
+  way[\"landuse\"~\"^(railway|grass|cemetery)$\"]${IN};
+  relation[\"landuse\"~\"^(railway|grass|cemetery)$\"]${IN};
+)->.f;
+(
   .all;
   way(bn.n);
   relation(bw.w);
+  .f;
+  .f >;
 );
 out meta;"
 

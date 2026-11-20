@@ -1,6 +1,7 @@
 -- Description: One result set per structure (PLAN 4.2): New, Reshape or Conflicts, with
--- every Conflicts reason that applies (4.4), from live_groups (130) and the neighbour rule
--- (140). A structure with any reason is Conflicts. 500 reads this table.
+-- every Conflicts reason that applies (4.4), from live_groups (130, 135) and the neighbour
+-- rule (140); a structure in no group takes its own, including feature contacts (135). A
+-- structure with any reason is Conflicts. 500 reads this table.
 
 DROP TABLE IF EXISTS classification;
 CREATE TABLE classification AS
@@ -17,6 +18,7 @@ FROM (
                    CASE WHEN w.sid IS NOT NULL THEN 'Live has parts' END,
                    CASE WHEN NOT s.valid THEN 'invalid geometry' END,
                    CASE WHEN ws.sid IS NOT NULL THEN 'building work since the data date' END,
+                   CASE WHEN fc.sid IS NOT NULL THEN 'overlaps an OSM feature other than a building' END,
                    CASE WHEN EXISTS (SELECT 1 FROM contacts c WHERE c.sid = s.sid)
                         THEN 'overlaps an OSM building without a link' END]
                END, NULL), '{}') AS reasons
@@ -25,5 +27,6 @@ FROM (
     LEFT JOIN live_groups g ON g.grp = m.grp
     LEFT JOIN with_parts w ON w.sid = s.sid
     LEFT JOIN works_structures ws ON ws.sid = s.sid
+    LEFT JOIN feature_contacts fc ON fc.sid = s.sid
 ) r;
 ALTER TABLE classification ADD PRIMARY KEY (sid);

@@ -24,7 +24,7 @@ con OpenStreetMap mediante:
 
 - `bin/` - Scripts auxiliares:
   - `download-dataset.sh` - Descarga el dataset de tejido urbano de Buenos Aires
-  - `fetch-live.sh` - Descarga los edificios de OSM en vivo, con metadatos, desde Overpass
+  - `fetch-live.sh` - Descarga los edificios de OSM en vivo, con metadatos, desde Overpass, y los elementos de OSM que no son edificios y que 135 revisa por superposición
   - `import-datasets.sh` - Importa datos de la ciudad y OSM en PostgreSQL/PostGIS
   - `run-migrations.sql` - Ejecuta scripts de migración SQL
   para la transformación de datos
