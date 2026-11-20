@@ -11,9 +11,11 @@ FROM (
     SELECT s.sid, l.lid, ST_Area(ST_Intersection(s.geom, l.geom)) AS overlap,
            s.area AS s_area, l.area AS l_area
     FROM structure_shapes s
+    -- ST_Intersects lets the join use the spatial index; ST_Relate alone cannot
     JOIN live_shapes l ON l.is_building AND ST_Intersects(s.geom, l.geom)
     WHERE ST_Relate(s.geom, l.geom, '2********')
 ) t
+-- ST_Relate '2********' can hold while the intersection area rounds to 0
 WHERE overlap > 0;
 CREATE INDEX ON contacts (sid);
 CREATE INDEX ON contacts (lid);

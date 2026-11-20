@@ -18,6 +18,7 @@ FROM city_data a
 JOIN city_data b
     ON a.parcel_id = b.parcel_id
     AND a.ogr_fid < b.ogr_fid
+    -- ST_Intersects lets the join use the spatial index; ST_Relate alone cannot
     AND ST_Intersects(a.geom, b.geom)
     AND ST_Relate(a.geom, b.geom, '****1****');
 
@@ -50,6 +51,8 @@ GROUP BY sid;
 
 -- Fill every outline hole under 1 sq m (PLAN 3.5); larger holes stay and are published as
 -- multipolygon relations. Holes that held a nested footprint are already filled by the union.
+-- fill_small_holes returns a MultiPolygon even for a Polygon, so it is applied only where a
+-- small hole exists, and a Polygon outline stays a Polygon.
 ALTER TABLE structures_raw ADD COLUMN has_small_hole BOOLEAN;
 UPDATE structures_raw
 SET has_small_hole = EXISTS (

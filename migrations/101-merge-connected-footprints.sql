@@ -11,6 +11,7 @@ JOIN city_data b
     ON a.parcel_id = b.parcel_id
     AND a.altura IS NOT DISTINCT FROM b.altura
     AND a.ogr_fid < b.ogr_fid
+    -- ST_Intersects lets the join use the spatial index; ST_Relate alone cannot
     AND ST_Intersects(a.geom, b.geom)
     AND ST_Relate(a.geom, b.geom, '****1****');
 

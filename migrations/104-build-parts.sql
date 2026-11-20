@@ -20,6 +20,8 @@ FROM city_data c
 JOIN structures s ON s.sid = c.sid AND s.n_fp > 1
 LEFT JOIN nested n ON n.ogr_fid = c.ogr_fid;
 
+-- fill_small_holes returns a MultiPolygon even for a Polygon, so it is applied only where a
+-- small hole exists, and a Polygon part stays a Polygon.
 UPDATE parts SET geom = fill_small_holes(geom, 1.0)
 WHERE EXISTS (
     SELECT 1 FROM ST_Dump(geom) p, generate_series(1, ST_NumInteriorRings(p.geom)) i
