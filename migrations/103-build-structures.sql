@@ -7,9 +7,9 @@
 -- restores the holes 080 cut, then fills every hole under 1 sq m (PLAN 3.5); larger holes
 -- stay and are published as multipolygon relations. height is the highest altura in the
 -- structure. split_by_overlap is set when any footprint in it was split by an overlap in 090
--- (PLAN 2.6). ref_cadastre is the SMP in its source spelling (PLAN 3.4), the most common one
--- where a parcel's footprints spell it differently; NULL for no-SMP footprints and
--- asentamientos informales.
+-- (PLAN 2.6). ckey is its coverage group (088, PLAN 2.8). ref_cadastre is the SMP in its
+-- source spelling (PLAN 3.4), the most common one where a parcel's footprints spell it
+-- differently; NULL for no-SMP footprints and asentamientos informales.
 
 DROP TABLE IF EXISTS cc_nodes, cc_edges;
 CREATE TEMP TABLE cc_edges AS
@@ -38,6 +38,7 @@ SELECT sid,
        MIN(parcel_id) AS parcel_id,
        MIN(pkey) AS pkey,
        MIN(bkey) AS bkey,
+       MIN(ckey) AS ckey,
        MIN(seccion) AS seccion,
        BOOL_OR(outlier) AS outlier,
        BOOL_OR(asentamiento_informal) AS asentamiento_informal,
@@ -62,7 +63,7 @@ SET has_small_hole = EXISTS (
 
 DROP TABLE IF EXISTS structures CASCADE;
 CREATE TABLE structures AS
-SELECT sid, parcel_id, pkey, bkey, seccion, outlier, asentamiento_informal, n_fp, height,
+SELECT sid, parcel_id, pkey, bkey, ckey, seccion, outlier, asentamiento_informal, n_fp, height,
        split_by_overlap, ref_cadastre,
        CASE WHEN has_small_hole THEN fill_small_holes(geom, 1.0) ELSE geom END AS geom
 FROM structures_raw;

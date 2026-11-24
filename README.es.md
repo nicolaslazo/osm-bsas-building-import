@@ -18,7 +18,7 @@ con OpenStreetMap mediante:
 - El uso de geometrías y atributos de datasets autorizados de la ciudad
 - La referencia cruzada con datos en vivo de OSM para evitar conflictos
 - La limpieza y transformación de datos a través de migraciones SQL
-- La generación de conjuntos de resultados: archivos New por sección, Conflicts por manzana y tareas Reshape
+- La generación de conjuntos de resultados: archivos New por sección, Conflicts por grupo de cobertura y tareas Reshape
 
 ## Estructura del Proyecto
 
@@ -77,9 +77,9 @@ La configuración del venv está en el encabezado del script; necesita los bindi
 GDAL del sistema. Los resultados quedan en `changesets/run_<fecha>/`:
 
 - `new/`: estructuras nuevas, un archivo `.osm` por sección
-- `conflicts/`: conflictos, un archivo `.osm` por manzana, para revisión
-- `reshape/`: un archivo `.osc` por tarea Reshape (grupos Reshape vecinos de una manzana), para
-  un desafío cooperativo de MapRoulette
+- `conflicts/`: conflictos, un archivo `.osm` por grupo de cobertura, para revisión
+- `reshape/`: un archivo `.osc` por tarea Reshape (grupos Reshape vecinos de un grupo de
+  cobertura), para un desafío cooperativo de MapRoulette
 
 Antes de la siguiente ronda, revisá los nodos viejos que Reshape dejó sin uso (no sube nada):
 

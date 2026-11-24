@@ -31,12 +31,19 @@ classification and publication: a structure is never split across two result set
 _Avoid_: building (the OSM object), complex, group, cluster
 
 **Block**:
-A `(seccion, manzana)` pair. The partition for every coverage operation, and the grouping unit
-for review in the Conflicts files; a New file holds one seccion, and Reshape is reviewed one
-Reshape task at a time on MapRoulette; a Reshape task never reaches past its block. Footprints with no SMP have no pair: those connected through gaps of at most 22 cm
-form a group; a group within 22 cm of a block's footprint joins that block, and any other
-group is a block by itself.
+A `(seccion, manzana)` pair. Footprints with no SMP have no pair: those connected through gaps
+of at most 22 cm form a group; a group within 22 cm of a block's footprint joins that block,
+and any other group is a block by itself.
 _Avoid_: manzana (ambiguous with the middle SMP component alone), city block, cuadra
+
+**Coverage group**:
+A block, or blocks whose footprints come within 22 cm of each other, directly or through a
+chain (blocks that meet with no street between them), keyed by its smallest block key. The
+partition for every coverage operation, and the grouping unit for review in the Conflicts
+files; a New file holds the coverage groups whose key is in its seccion, and Reshape is
+reviewed one Reshape task at a time on MapRoulette; a Reshape task never reaches past its
+coverage group.
+_Avoid_: block (most coverage groups are one block, but not all), cluster
 
 **SMP**:
 A cadastral reference formatted `seccion-manzana-parcela` (e.g. `87-006A-015`). Components may

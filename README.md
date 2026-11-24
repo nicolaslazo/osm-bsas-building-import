@@ -16,7 +16,7 @@ This project bridges official Buenos Aires building data with OpenStreetMap by:
 - Using authoritative city dataset geometries and attributes
 - Cross-referencing with live OSM data to prevent duplicates
 - Cleaning and transforming data through SQL migrations
-- Generating result sets: New files per seccion, Conflicts files per block, Reshape tasks
+- Generating result sets: New files per seccion, Conflicts files per coverage group, Reshape tasks
 
 ## Project Structure
 
@@ -73,8 +73,8 @@ The venv setup is in the script header; it needs the system GDAL Python bindings
 sets go to `changesets/run_<date>/`:
 
 - `new/`: New structures, one `.osm` file per seccion
-- `conflicts/`: Conflicts, one `.osm` file per block, for review
-- `reshape/`: one `.osc` file per Reshape task (neighbouring Reshape groups of one block), for a
+- `conflicts/`: Conflicts, one `.osm` file per coverage group, for review
+- `reshape/`: one `.osc` file per Reshape task (neighbouring Reshape groups of one coverage group), for a
   MapRoulette cooperative challenge
 
 Before the next release round, check the old nodes Reshape left unused (uploads nothing):

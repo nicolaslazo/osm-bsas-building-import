@@ -1,4 +1,4 @@
--- Description: Clean each block's coverage (PLAN 2.1, 2.3, 4.6): snap nodes within ~22 cm,
+-- Description: Clean each coverage group (088; PLAN 2.1, 2.3, 2.8): snap nodes within ~22 cm,
 -- fill gaps narrower than ~2.2 cm, merge overlaps into the larger footprint.
 -- Footprints the cleaning collapses to NULL or EMPTY are dropped.
 -- Footprints the cleaning splits into more parts are recorded in split_footprints (PLAN 2.6):
@@ -6,8 +6,8 @@
 -- becomes a footprint; any other split comes from an overlap, and the footprint stays whole
 -- and is flagged split_by_overlap, which sends its structure to Conflicts (150).
 
--- The result depends on the order of a block's footprints: ordered by ogr_fid, a run on the
--- same input gives the same result
+-- The result depends on the order of a coverage group's footprints: ordered by ogr_fid, a run
+-- on the same input gives the same result
 CREATE TEMP TABLE clean AS
   SELECT
     ogr_fid,
@@ -16,7 +16,7 @@ CREATE TEMP TABLE clean AS
       2e-7,            -- gap maximum width: ~2.2 cm
       2e-6,            -- snapping distance: ~22 cm
       'MERGE_MAX_AREA' -- merge strategy
-    ) OVER (PARTITION BY bkey ORDER BY ogr_fid) AS clean_geom
+    ) OVER (PARTITION BY ckey ORDER BY ogr_fid) AS clean_geom
   FROM city_data;
 
 -- Footprints the cleaning collapses, kept with their geometry before cleaning for review

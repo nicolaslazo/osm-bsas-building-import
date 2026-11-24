@@ -8,7 +8,7 @@ Usage:
 Reads structures, parts and classification and reshape_tasks from SCHEMA (migrations 103-170) and writes:
     DIR/new/seccion-NN.osm       New, one file per seccion
     DIR/new/nosmp-N.osm          New, one file per no-SMP group that is a block by itself
-    DIR/conflicts/BKEY.osm       Conflicts, one file per block (held in round 1)
+    DIR/conflicts/CKEY.osm       Conflicts, one file per coverage group (held in round 1)
     DIR/reshape/wID.osc, rID.osc Reshape, one osmChange per task (170: touching groups), named
                                  by the Live building its first group keeps; for a MapRoulette
                                  cooperative challenge
@@ -16,6 +16,10 @@ Reads structures, parts and classification and reshape_tasks from SCHEMA (migrat
                                  (checked and deleted by 510 before the next round)
 DIR defaults to changesets/SCHEMA and is replaced. --blocks writes only the structures of those
 blocks (the pilot).
+
+Files follow the coverage group (088), so a wall shared across two blocks is written in one
+file and gets one set of nodes: a New file holds the coverage groups whose key is in its
+seccion, and a Conflicts file is named by the group's key.
 
 Geometry goes through ogr2osm: a way per ring-less polygon, a multipolygon relation where holes
 remain, nodes shared by rounded coordinate (7 digits, 3.2). A structure of one footprint is a
@@ -135,29 +139,30 @@ def part_tags(sid, altura):
 
 
 FEATURES_SQL = """
-SELECT k.result, s.sid, s.bkey, s.ref_cadastre, s.height, s.asentamiento_informal, NULL::float8,
+SELECT k.result, s.sid, s.ckey, s.ref_cadastre, s.height, s.asentamiento_informal, NULL::float8,
        ST_AsBinary(s.geom), 0 AS ord
 FROM structures s JOIN classification k USING (sid)
 WHERE k.result = %(result)s AND (%(blocks)s::text[] IS NULL OR s.bkey = ANY(%(blocks)s))
 UNION ALL
-SELECT k.result, p.sid, s.bkey, NULL, NULL, NULL, p.altura, ST_AsBinary(p.geom), 1
+SELECT k.result, p.sid, s.ckey, NULL, NULL, NULL, p.altura, ST_AsBinary(p.geom), 1
 FROM parts p JOIN structures s USING (sid) JOIN classification k USING (sid)
 WHERE k.result = %(result)s AND (%(blocks)s::text[] IS NULL OR s.bkey = ANY(%(blocks)s))
 ORDER BY 3, 2, 9
 """
 
 
-def file_key(result, bkey):
+def file_key(result, ckey):
     if result == "C":
-        return os.path.join("conflicts", bkey + ".osm")
-    if bkey.startswith("nosmp-"):
-        return os.path.join("new", bkey + ".osm")
-    return os.path.join("new", "seccion-%s.osm" % bkey.split("-")[0].zfill(2))
+        return os.path.join("conflicts", ckey + ".osm")
+    if ckey.startswith("nosmp-"):
+        return os.path.join("new", ckey + ".osm")
+    return os.path.join("new", "seccion-%s.osm" % ckey.split("-")[0].zfill(2))
 
 
 def write_block_files(conn, out, result, blocks):
-    """New or Conflicts: plain JOSM .osm files, one per file key. Rows arrive ordered by block,
-    and the blocks of one seccion sort together, so each file is written as soon as it ends."""
+    """New or Conflicts: plain JOSM .osm files, one per file key. Rows arrive ordered by coverage
+    group, and the groups of one seccion sort together, so each file is written as soon as it
+    ends."""
     counts = defaultdict(lambda: [0, 0])
     rows, current = [], None
 
@@ -169,8 +174,8 @@ def write_block_files(conn, out, result, blocks):
     with conn.cursor(name="features_" + result) as cur:
         cur.itersize = 20000
         cur.execute(FEATURES_SQL, {"result": result, "blocks": blocks})
-        for res, sid, bkey, ref, height, informal, altura, wkb, ord_ in cur:
-            key = file_key(res, bkey)
+        for res, sid, ckey, ref, height, informal, altura, wkb, ord_ in cur:
+            key = file_key(res, ckey)
             if key != current:
                 if current is not None:
                     flush()

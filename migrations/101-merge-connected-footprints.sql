@@ -30,33 +30,33 @@ SELECT n.comp::INT AS kept,
        -- ST_CoverageUnion only drops the shared walls; the other vertices stay exactly
        -- where 100 left them, so walls shared with neighbours still match
        ST_CoverageUnion(c.geom) AS geom,
-       MIN(c.bkey) AS bkey
+       MIN(c.ckey) AS ckey
 FROM cc_nodes n JOIN city_data c ON c.ogr_fid = n.id
 GROUP BY n.comp;
 
 -- Where three or more footprints meet within a few cm, the union can leave an edge that
--- no longer matches its neighbour's (2 blocks on the 2026-09-24 source). Those blocks keep
--- their footprints unmerged, so Gate 1's coverage check still holds. They still join
--- one structure in 103.
-CREATE TEMP TABLE unmerged_blocks AS
-SELECT DISTINCT bkey FROM (
-    SELECT bkey, ST_CoverageInvalidEdges(geom) OVER (PARTITION BY bkey) AS e
+-- no longer matches its neighbour's (2 blocks on the 2026-09-24 source). Those coverage
+-- groups (088) keep their footprints unmerged, so Gate 1's coverage check still holds. They
+-- still join one structure in 103.
+CREATE TEMP TABLE unmerged_groups AS
+SELECT DISTINCT ckey FROM (
+    SELECT ckey, ST_CoverageInvalidEdges(geom) OVER (PARTITION BY ckey) AS e
     FROM (
-        SELECT bkey, geom FROM city_data c
-        WHERE c.bkey IN (SELECT bkey FROM merged_shapes)
+        SELECT ckey, geom FROM city_data c
+        WHERE c.ckey IN (SELECT ckey FROM merged_shapes)
           AND NOT EXISTS (SELECT 1 FROM cc_nodes n WHERE n.id = c.ogr_fid)
         UNION ALL
-        SELECT bkey, geom FROM merged_shapes
+        SELECT ckey, geom FROM merged_shapes
     ) candidate
 ) x WHERE e IS NOT NULL;
 
-DELETE FROM merged_geoms WHERE kept IN (SELECT kept FROM merged_shapes WHERE bkey IN (SELECT bkey FROM unmerged_blocks));
-DELETE FROM merged_shapes WHERE bkey IN (SELECT bkey FROM unmerged_blocks);
+DELETE FROM merged_geoms WHERE kept IN (SELECT kept FROM merged_shapes WHERE ckey IN (SELECT ckey FROM unmerged_groups));
+DELETE FROM merged_shapes WHERE ckey IN (SELECT ckey FROM unmerged_groups);
 
 DO $$
 BEGIN
-    RAISE NOTICE '101: % blocks left unmerged: %',
-        (SELECT COUNT(*) FROM unmerged_blocks), (SELECT string_agg(bkey, ', ') FROM unmerged_blocks);
+    RAISE NOTICE '101: % coverage groups left unmerged: %',
+        (SELECT COUNT(*) FROM unmerged_groups), (SELECT string_agg(ckey, ', ') FROM unmerged_groups);
 END $$;
 
 UPDATE city_data c SET geom = m.geom FROM merged_shapes m WHERE c.ogr_fid = m.kept;

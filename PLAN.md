@@ -391,6 +391,84 @@ resolve. Informal discussion can continue in the existing forum thread
         overlap a feature 5,841 to 5,788; Reshape structures 669 to 658, in
         609 to 599 of 8,871 groups. The correction removes about 1 % of the
         overlaps, not a part that changes 4.7's decision.
+- [x] **2.8 Clean blocks that touch as one coverage.** 090 and 100 partition by
+      block, on 4.6's premise that a block is bounded by streets, so buildings
+      of different blocks share no wall. The premise is false: where two
+      blocks meet with no street between them, each side is cleaned and
+      simplified alone, and the shared wall keeps the source's overlap or a
+      gap of a few millimetres. Gate 1 checks each block alone and passes.
+      Found (2026-11-17, forum post by caprieldeluca on the pilot changeset
+      190860628): six nodes that make two buildings overlap, a node within a
+      centimetre of a neighbour's wall it is not part of. All six lie on a
+      wall between two blocks: 54-93/54-94 and 54-119A/54-120. A scan of the
+      uploaded file for every node within 5 cm of a way it does not belong
+      to finds eight, 0.6 to 4.8 mm off: 14307836811, 14307837129,
+      14307903232, 14307903442, 14307903901, 14307903902 (reported),
+      14307903886 and 14307904016.
+      Bisected (2026-11-19, the source around the pilot, 9,343 footprints,
+      migrations run one at a time): the 7 footprint pairs within 2 cm across
+      the two block borders are in the source (3 overlap by 1 to 6 cm², 4
+      nearly touch), and every step up to 087 leaves them as they are. 090
+      makes every block valid (1,179 invalid edges to 0) and leaves the 7;
+      100 simplifies each side alone and leaves 1 overlap and 6 near
+      misses. No step makes the error; none can repair it.
+      Measured (`run_20260927`): 119 block pairs within 22 cm, 198 of 12,795
+      blocks, 686 footprints. They form 80 groups: 62 of two blocks, 13 of
+      three, and one of 16 (95-64A to 95-64P). Seccion 54 holds two pairs,
+      both in the pilot. Three groups cross a seccion line: 21-167A/23-163,
+      26-1Z/34-103B (with 26-57E and 26-6Z), 97-2V/98-1.
+      Decision (2026-11-20): group touching blocks into coverage groups
+      (`ckey`). New migration 088, after 087 so it sees the corrected
+      positions, computes them; 090,
+      100, 101's unmerged check and Gate 1 partition by coverage group, not
+      block. Gate 1 also stops the run when footprints of two coverage
+      groups come within 2.2 cm (090's gap width), which no check covered.
+      The coverage group carries through to publication, so a shared wall's
+      nodes are written once:
+      - 103 records each structure's coverage group;
+      - 170: a Reshape task never reaches past its coverage group (was its
+        block);
+      - 500: a New file holds the seccion of the coverage group's key, so
+        the three groups that cross a seccion line go whole into one file;
+        a Conflicts file holds one coverage group, named by its key (one
+        block, except in the 80 groups).
+      Tested on the pilot's source (prototype): the 7 pairs share their wall
+      exactly, no invalid edge over the whole area, Gate 1 passes.
+      Considered and dropped: one partition per seccion (about 123 blocks per
+      window, and three groups cross a seccion line anyway); no partition
+      (1.2 M footprints in one window).
+      The pilot's eight nodes are moved with 6.10.
+      Implemented (2026-11-20), tested on `cov_20260924` (the inputs of
+      `offset_20260924`, its `live_features` copied in: the 2026-09-27 fetch
+      holds only 878): 088 finds 116 block pairs, 192 blocks in 77 coverage
+      groups of two or more, the largest 16 blocks (95-64A); 12,680 coverage
+      groups in all. Gate 1 and Gate 2 pass. Against `offset_20260924`:
+      - Footprints outside the 77 groups keep their shape (7,881 differ only
+        in vertex order, from 101's union). Inside them 369 change: 266 by
+        less than 5 cm, 32 by more than 5 m.
+      - 090 drops 56 more footprints as NULL or EMPTY, all in the groups, and
+        flags 16 more as split by an overlap: 1,209,538 footprints at Gate 1.
+      - Result sets N 358,413 to 358,417, R 9,828 to 9,830, C 62,065 to
+        62,004 structures; 5,944 to 5,946 Reshape tasks. Part of the change
+        in C comes from 135 to 150 code that changed after the
+        `offset_20260924` run, not from 2.8.
+      - Every New and Conflicts file scanned for a node within 1 cm of a way
+        it does not belong to: none in New (before, in `run_20260927`: 20 in
+        seccion 54, 19 in 26, 38 in 21, 23 in 23); Conflicts `11-43.osm`
+        keeps 12 within one block, the same as before, a separate cause.
+      - The groups crossing a seccion line are whole in one file: 23-163's
+        New structures are in `seccion-21.osm`.
+      Found (2026-11-20): before 2.8 the output held 285 overlapping pairs of
+      footprints from two blocks, 18,025 m² of overlap, 118 of them over 1 m²:
+      buildings published on top of each other. Cleaned as one coverage,
+      090 gives each overlap to the larger footprint (`MERGE_MAX_AREA`), as it
+      already did inside a block. 34 footprints lose more than half their
+      area, in 5 groups: 95-64A (15, 8,302 m²), 78-163 (15, 5,688 m²; 78-1E
+      against 78-1H), 26-1Z (2), 64-75 (1), 26-10 (1). 16 of them come out
+      multipart and go to Conflicts (2.6); 18 stay single-part and are
+      published shrunk, e.g. ogr_fid 130949 (78-1E) from 740 to 5.5 m².
+      Open: whether a footprint 090 shrinks by more than half goes to
+      Conflicts, inside a block as well.
 
 ## Phase 3 — Output model
 
@@ -970,6 +1048,8 @@ resolve. Informal discussion can continue in the existing forum thread
       Duplicate nodes across file borders do not occur: a block is bounded by
       streets, so buildings of different blocks share no wall, and 090 and 100
       already partition by block.
+      Corrected (2026-11-20): 198 blocks do share walls with another block
+      (2.8); 090 to 102, 170 and 500 now use the coverage group.
 - [x] **4.7 Hold structures that overlap other OSM features.** 4.3 and
       4.5 compare structures only with Live buildings. Nothing checks streets,
       railways, water or open-space areas, and JOSM's validator reports a
@@ -1618,6 +1698,8 @@ resolve. Informal discussion can continue in the existing forum thread
         change.
       - Move the New buildings already in Live by their block's vector,
         unless a mapper has edited them since.
+      - Put the eight nodes off a neighbouring block's wall (2.8) on that
+        wall, or replace both walls with the coverage group's shared wall.
       To decide: how the uploaded New buildings are moved (a modify
       changeset from the import account, or a revert and a new upload),
       and whether Reforma and Conflictos wait for this item.
