@@ -5,3 +5,4 @@ data/
 !examples/*.geojson
 !piloto/**/*.geojson
 .venv/
+.env
